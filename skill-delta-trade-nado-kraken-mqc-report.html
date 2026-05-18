@@ -1,0 +1,1775 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Delta Trade Nado + Kraken MQC | Skill Report</title>
+  <style>
+    :root {
+      --bg: #070a0e;
+      --panel: #10161f;
+      --panel-2: #141c27;
+      --panel-3: #192332;
+      --ink: #f2f7fb;
+      --muted: #9eabb8;
+      --line: #2b3848;
+      --line-strong: #3e5269;
+      --green: #45e083;
+      --cyan: #52d9ff;
+      --amber: #ffcc66;
+      --red: #ff6b6b;
+      --violet: #b9a7ff;
+      --radius: 8px;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.34);
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, #070a0e 0%, #0a0f16 46%, #080b10 100%);
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: linear-gradient(180deg, black, transparent 78%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .shell {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(7, 10, 14, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      display: grid;
+      place-items: center;
+      background: var(--panel);
+      color: var(--green);
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .brand span {
+      display: block;
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav a,
+    .nav button,
+    .copy-button {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .nav a:hover,
+    .nav button:hover,
+    .copy-button:hover {
+      border-color: var(--line-strong);
+      background: rgba(255, 255, 255, 0.075);
+    }
+
+    .menu-button {
+      display: none;
+    }
+
+    .primary-link {
+      color: #06110c !important;
+      background: linear-gradient(90deg, var(--green), var(--cyan)) !important;
+      border-color: transparent !important;
+    }
+
+    .hero {
+      position: relative;
+      min-height: min(760px, calc(100vh - 72px));
+      display: grid;
+      align-items: center;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.84;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(7, 10, 14, 0.96) 0%, rgba(7, 10, 14, 0.82) 42%, rgba(7, 10, 14, 0.28) 100%),
+        linear-gradient(180deg, rgba(7, 10, 14, 0.12) 0%, rgba(7, 10, 14, 0.92) 100%);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      padding: 86px 0 58px;
+      max-width: 920px;
+    }
+
+    .eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      margin-top: 16px;
+      max-width: 920px;
+      font-size: clamp(42px, 8vw, 96px);
+      line-height: 0.94;
+      letter-spacing: 0;
+      overflow-wrap: break-word;
+    }
+
+    .hero-copy {
+      margin-top: 22px;
+      max-width: 760px;
+      color: #c7d1dc;
+      font-size: clamp(17px, 2.1vw, 23px);
+      line-height: 1.45;
+    }
+
+    .hero-actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .hero-action {
+      min-height: 46px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.06);
+      font-weight: 860;
+    }
+
+    .hero-action.primary {
+      color: #06110c;
+      border-color: transparent;
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+    }
+
+    .hero-strip {
+      margin-top: 38px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 940px;
+    }
+
+    .hero-stat {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius);
+      padding: 14px;
+      background: rgba(16, 22, 31, 0.78);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero-stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 850;
+    }
+
+    .hero-stat strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--ink);
+      font-size: clamp(18px, 2vw, 28px);
+      line-height: 1;
+    }
+
+    section {
+      padding: 64px 0;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(280px, 0.42fr);
+      gap: 28px;
+      align-items: end;
+      margin-bottom: 22px;
+    }
+
+    .section-head h2 {
+      margin-top: 8px;
+      font-size: clamp(30px, 4.4vw, 56px);
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .section-head p {
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid.cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid.cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .grid.cols-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+        var(--panel);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      min-width: 0;
+    }
+
+    .card.soft {
+      box-shadow: none;
+      background: var(--panel-2);
+    }
+
+    .card.special {
+      border-color: color-mix(in srgb, var(--green) 44%, var(--line));
+      background:
+        linear-gradient(135deg, rgba(69, 224, 131, 0.12), rgba(82, 217, 255, 0.04) 50%, rgba(255, 255, 255, 0.018)),
+        var(--panel);
+    }
+
+    .card.warn {
+      border-color: color-mix(in srgb, var(--amber) 48%, var(--line));
+      background:
+        linear-gradient(135deg, rgba(255, 204, 102, 0.12), rgba(255, 255, 255, 0.018)),
+        var(--panel);
+    }
+
+    .card.danger {
+      border-color: color-mix(in srgb, var(--red) 52%, var(--line));
+      background:
+        linear-gradient(135deg, rgba(255, 107, 107, 0.12), rgba(255, 255, 255, 0.018)),
+        var(--panel);
+    }
+
+    .kicker {
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .card h3 {
+      margin-top: 8px;
+      font-size: clamp(20px, 2vw, 28px);
+      line-height: 1.08;
+    }
+
+    .card p {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .tag {
+      min-height: 25px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 2px 9px;
+      color: #cbd7e3;
+      background: rgba(255, 255, 255, 0.045);
+      font-size: 11px;
+      font-weight: 820;
+    }
+
+    .tag.green { color: var(--green); border-color: rgba(69, 224, 131, 0.35); }
+    .tag.cyan { color: var(--cyan); border-color: rgba(82, 217, 255, 0.35); }
+    .tag.amber { color: var(--amber); border-color: rgba(255, 204, 102, 0.35); }
+    .tag.red { color: var(--red); border-color: rgba(255, 107, 107, 0.35); }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .flow-step {
+      position: relative;
+      min-height: 146px;
+    }
+
+    .flow-step strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 17px;
+      line-height: 1.18;
+    }
+
+    .flow-step p {
+      font-size: 13px;
+    }
+
+    .num {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--green) 16%, var(--panel-3));
+      color: var(--green);
+      font-weight: 950;
+      font-size: 12px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 850;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 7px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .setup-card {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .setup-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .win {
+      min-width: 92px;
+      text-align: right;
+    }
+
+    .win span {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+    }
+
+    .win strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--green);
+      font-size: clamp(26px, 3vw, 40px);
+      line-height: 0.95;
+    }
+
+    .bar {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      width: var(--value);
+      background: linear-gradient(90deg, var(--green), var(--cyan));
+      border-radius: inherit;
+    }
+
+    .projection {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .projection div {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .projection span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .projection strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .tech-details {
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .tech-details strong {
+      color: var(--cyan);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .tech-details ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .tech-details li + li {
+      margin-top: 5px;
+    }
+
+    .step-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-card::before {
+      content: attr(data-step);
+      position: absolute;
+      right: 14px;
+      top: 12px;
+      color: rgba(82, 217, 255, 0.18);
+      font-size: 48px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .step-card h3,
+    .step-card p,
+    .step-card ul,
+    .step-card .tags {
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-card ul {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .step-card li + li {
+      margin-top: 6px;
+    }
+
+    .mqc-path {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .mqc-path .card {
+      box-shadow: none;
+    }
+
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: auto;
+      max-width: 100%;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 860px;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+      color: #dce6ef;
+      line-height: 1.42;
+    }
+
+    th {
+      color: var(--cyan);
+      background: var(--panel-2);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .command {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #06090e;
+      box-shadow: none;
+    }
+
+    .command-head {
+      min-height: 42px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px 0 14px;
+    }
+
+    .command-head strong {
+      font-size: 12px;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
+    }
+
+    pre {
+      margin: 0;
+      padding: 14px;
+      color: #e8f1f8;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .copy-button {
+      min-height: 30px;
+      padding: 0 10px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .env-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .env-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 14px;
+    }
+
+    .env-box strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .env-box code {
+      display: block;
+      color: var(--muted);
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+      font-size: 12px;
+    }
+
+    .risk-band {
+      border: 1px solid color-mix(in srgb, var(--amber) 42%, var(--line));
+      border-radius: var(--radius);
+      background: linear-gradient(90deg, rgba(255, 204, 102, 0.12), rgba(255, 107, 107, 0.08));
+      padding: 18px;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .risk-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: rgba(255, 204, 102, 0.14);
+      color: var(--amber);
+      font-weight: 950;
+    }
+
+    .risk-band p {
+      margin-top: 6px;
+      color: #d8cbb2;
+      line-height: 1.55;
+    }
+
+    .footer {
+      padding: 38px 0 52px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .footer code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translate(-50%, 12px);
+      opacity: 0;
+      pointer-events: none;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--ink);
+      padding: 10px 13px;
+      font-weight: 820;
+      box-shadow: var(--shadow);
+      transition: opacity 140ms ease, transform 140ms ease;
+      z-index: 50;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
+    @media (max-width: 980px) {
+      .topbar-inner {
+        align-items: flex-start;
+        padding: 14px 0;
+      }
+
+      .menu-button {
+        display: inline-flex;
+      }
+
+      .nav {
+        position: absolute;
+        left: 16px;
+        right: 16px;
+        top: 72px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(7, 10, 14, 0.98);
+        display: none;
+        justify-content: stretch;
+      }
+
+      body.nav-open .nav {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .nav a {
+        width: 100%;
+      }
+
+      .hero-strip,
+      .section-head,
+      .grid.cols-2,
+      .grid.cols-3,
+      .grid.cols-4,
+      .flow,
+      .cmd-grid,
+      .mqc-path,
+      .env-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        min-height: auto;
+      }
+
+      .hero-content {
+        padding: 62px 0 42px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        width: min(100% - 24px, 1180px);
+      }
+
+      .hero::after {
+        background:
+          linear-gradient(90deg, rgba(7, 10, 14, 0.97), rgba(7, 10, 14, 0.84)),
+          linear-gradient(180deg, rgba(7, 10, 14, 0.16), rgba(7, 10, 14, 0.94));
+      }
+
+      h1 {
+        max-width: 100%;
+        font-size: clamp(34px, 11vw, 50px);
+        line-height: 1;
+      }
+
+      section {
+        padding: 44px 0;
+      }
+
+      .setup-top,
+      .risk-band {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .win {
+        min-width: 0;
+        text-align: left;
+      }
+
+      .metric-row,
+      .projection {
+        grid-template-columns: 1fr;
+      }
+
+      .command-head {
+        align-items: stretch;
+        flex-direction: column;
+        padding: 10px;
+      }
+
+      .copy-button {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .table-wrap {
+        overflow: visible;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      table,
+      thead,
+      tbody,
+      tr,
+      td {
+        display: block;
+        width: 100%;
+        min-width: 0;
+      }
+
+      table {
+        min-width: 0;
+      }
+
+      thead {
+        display: none;
+      }
+
+      tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      tr {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        overflow: hidden;
+      }
+
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        color: var(--cyan);
+        font-size: 10px;
+        font-weight: 950;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      td:last-child {
+        border-bottom: 0;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <a class="brand" href="https://github.com/QuickClaw-Skills/skill-delta-neutral-nado-kraken" target="_self" rel="noopener noreferrer">
+        <div class="brand-mark" aria-hidden="true">Δ</div>
+        <div>
+          <strong>Delta Trade Nado + Kraken MQC</strong>
+          <span>Skill operacional para hedge, funding e setups</span>
+        </div>
+      </a>
+      <button class="menu-button" id="menuButton" type="button" aria-label="Abrir menu">Menu</button>
+      <nav class="nav" aria-label="Navegacao principal">
+        <a href="#skill">Skill</a>
+        <a href="#fluxo">Fluxo</a>
+        <a href="#setups">Setups</a>
+        <a href="#mqc">MQC</a>
+        <a class="primary-link" href="#risco">Risco</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" id="topo">
+      <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="shell hero-content">
+        <div class="eyebrow">Skill MQC / OpenClaw</div>
+        <h1>Delta Trade Nado + Kraken</h1>
+        <p class="hero-copy">
+          Uma skill para diagnosticar, simular, monitorar e, somente com autorizacao explicita, executar estrategias entre Nado DEX e Kraken CEX com foco em delta neutro, funding, ordens solo e guardrails de seguranca.
+        </p>
+        <div class="hero-actions">
+          <a class="hero-action primary" href="#skill">Entender a skill</a>
+        </div>
+        <div class="hero-strip">
+          <div class="hero-stat"><span>Venues</span><strong>Nado + Kraken</strong></div>
+          <div class="hero-stat"><span>Modos</span><strong>3 execucoes</strong></div>
+          <div class="hero-stat"><span>Skill</span><strong>v1.0.20</strong></div>
+          <div class="hero-stat"><span>Comandos</span><strong>30 no catalogo</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skill">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">O que ela faz</div>
+            <h2>Uma camada operacional entre estratégia, exchange e segurança</h2>
+          </div>
+          <p>
+            A skill combina o wrapper MQC/OpenClaw, integrações Nado/Kraken, simulações, leitura de mercado, sizing por margem e bloqueios para impedir trade live acidental.
+          </p>
+        </div>
+
+        <div class="grid cols-3">
+          <article class="card special">
+            <div class="kicker">Delta neutro</div>
+            <h3>Hedge Nado + Kraken</h3>
+            <p>Abre pernas opostas entre DEX e CEX para reduzir exposição direcional e buscar volume, spread, funding ou eficiência entre venues.</p>
+            <div class="tags">
+              <span class="tag green">Hedge</span>
+              <span class="tag cyan">Nado DEX</span>
+              <span class="tag cyan">Kraken CEX</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="kicker">Ordens solo</div>
+            <h3>DEX-only e CEX-only</h3>
+            <p>Além do modo hedgeado, a skill aceita operar apenas Nado ou apenas Kraken quando a estratégia ou o ambiente pedir uma perna isolada.</p>
+            <div class="tags">
+              <span class="tag">dex_only</span>
+              <span class="tag">cex_only</span>
+              <span class="tag">hedged</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="kicker">Guardrails</div>
+            <h3>Bloqueio de live por padrão</h3>
+            <p>Comandos de trade ficam bloqueados até a execução aprovada usar confirmação explícita. Estado e logs ficam fora do Git.</p>
+            <div class="tags">
+              <span class="tag amber">Secrets fora do Git</span>
+              <span class="tag red">Live exige flag</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="conceitos">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Explicação simples</div>
+            <h2>Win rate, Profit Factor e por que nem tudo usa taxa de acerto</h2>
+          </div>
+          <p>
+            Os setups direcionais podem ser comparados por assertividade. Já Delta Neutro e Funding Rate precisam de leitura por cenário, custo, spread, funding e resultado líquido.
+          </p>
+        </div>
+
+        <div class="grid cols-3">
+          <article class="card soft">
+            <div class="kicker">Win Rate</div>
+            <h3>Taxa de acerto</h3>
+            <p>Se uma estratégia tem 70% de win rate, em cada 100 operações históricas aproximadamente 70 terminaram em lucro e 30 em prejuízo. Isso não garante lucro sozinho.</p>
+          </article>
+          <article class="card soft">
+            <div class="kicker">Profit Factor</div>
+            <h3>Ganho bruto por perda</h3>
+            <p>PF 2.00x significa que, para cada US$ 1 perdido nos testes, o setup gerou US$ 2 em lucro bruto. O tamanho médio dos ganhos e perdas importa.</p>
+          </article>
+          <article class="card warn">
+            <div class="kicker">Aviso</div>
+            <h3>Histórico não é promessa</h3>
+            <p>As projeções abaixo são educativas: 100 operações, risco de 1% do capital inicial por operação, sem composição, taxas, slippage ou liquidação.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="fluxo">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Fluxo seguro</div>
+            <h2>Da validação ao live, sem pular etapas</h2>
+          </div>
+          <p>
+            A skill foi desenhada para começar em diagnóstico e simulação. Trade real só entra no fim do fluxo, com credenciais corretas e confirmação explícita.
+          </p>
+        </div>
+
+        <div class="flow">
+          <article class="card soft flow-step"><div class="num">01</div><strong>setup-check</strong><p>Verifica runtime, paths e envs sem inicializar exchanges.</p></article>
+          <article class="card soft flow-step"><div class="num">02</div><strong>bootstrap</strong><p>Cria ou atualiza a venv local e instala requirements do workspace.</p></article>
+          <article class="card soft flow-step"><div class="num">03</div><strong>doctor</strong><p>Roda diagnóstico operacional MQC/OpenClaw antes de simular ou operar.</p></article>
+          <article class="card soft flow-step"><div class="num">04</div><strong>simular</strong><p>Usa symbols, funding, simulate e scenario-matrix para ler oportunidades.</p></article>
+          <article class="card soft flow-step"><div class="num">05</div><strong>dry-run</strong><p>Testa setup-live sem execução real e confirma sizing, stop e modo.</p></article>
+          <article class="card soft flow-step"><div class="num">06</div><strong>live aprovado</strong><p>Somente com DELTA_NEUTRAL_CONFIRM_LIVE=true na execução aprovada.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="especial">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Estratégias especiais</div>
+            <h2>Delta Neutro e Funding Rate não são avaliados como setup comum</h2>
+          </div>
+          <p>
+            Esses dois blocos não dependem de prever alta ou queda. A leitura correta é por spread, funding, custo, tempo de posição, hedge e risco de liquidação.
+          </p>
+        </div>
+
+        <div class="grid cols-2">
+          <article class="card special">
+            <div class="kicker">Estratégia especial</div>
+            <h3>Delta Neutro</h3>
+            <p>Busca reduzir risco direcional abrindo posições opostas entre Nado e Kraken. O objetivo não é acertar a direção do preço, mas controlar exposição e capturar eficiência entre mercados.</p>
+            <div class="metric-row">
+              <div class="metric"><span>Métrica</span><strong>Spread</strong></div>
+              <div class="metric"><span>Risco</span><strong>Drift</strong></div>
+              <div class="metric"><span>Custo</span><strong>Fees</strong></div>
+              <div class="metric"><span>Gestão</span><strong>Rebalance</strong></div>
+            </div>
+            <p>No Delta Neutro, a projeção deve ser calculada por cenário real, não por 100 operações com win rate fixo.</p>
+          </article>
+
+          <article class="card special">
+            <div class="kicker">Estratégia especial</div>
+            <h3>Funding Rate</h3>
+            <p>Procura momentos em que o mercado paga uma taxa atrativa para manter determinada posição, normalmente combinando hedge para reduzir exposição à direção do preço.</p>
+            <div class="metric-row">
+              <div class="metric"><span>Métrica</span><strong>Funding</strong></div>
+              <div class="metric"><span>Tempo</span><strong>Ciclos</strong></div>
+              <div class="metric"><span>Filtro</span><strong>Spread</strong></div>
+              <div class="metric"><span>Saída</span><strong>Custo</strong></div>
+            </div>
+            <p>Exemplo didático: se a posição recebe funding líquido de 0,03% por ciclo, o retorno vem da soma dessas taxas menos custos e variação do hedge.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="setups">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Setups direcionais</div>
+            <h2>Os 5 setups ativos em linguagem comercial</h2>
+          </div>
+          <p>
+            As simulações usam 100 operações com risco fixo de 1% do capital inicial. Elas servem para visualizar força estatística, não promessa de retorno.
+          </p>
+        </div>
+
+        <div class="grid cols-2">
+          <article class="card setup-card">
+            <div class="setup-top">
+              <div><div class="kicker">Tendência</div><h3>Institutional Strict</h3></div>
+              <div class="win"><span>Assertividade</span><strong>63.2%</strong></div>
+            </div>
+            <p>Procura tendência saudável, bom volume e confirmação institucional antes de entrar. Tem menor taxa de acerto que alguns setups, mas excelente relação entre ganho e perda.</p>
+            <div class="bar" style="--value: 63.2%"><span></span></div>
+            <div class="metric-row">
+              <div class="metric"><span>Profit</span><strong>12</strong></div>
+              <div class="metric"><span>Loss</span><strong>7</strong></div>
+              <div class="metric"><span>PF</span><strong>3.32x</strong></div>
+              <div class="metric"><span>Amostra</span><strong>19</strong></div>
+            </div>
+            <div class="projection"><div><span>US$ 200</span><strong>US$ 370,75</strong></div><div><span>US$ 1.000</span><strong>US$ 1.853,76</strong></div></div>
+            <div class="tech-details">
+              <strong>Detalhes técnicos</strong>
+              <ul>
+                <li><b>Timeframe:</b> leitura principal em 1h, com foco em continuação de tendência.</li>
+                <li><b>Entrada:</b> EMA9 acima da EMA21, preço acima da EMA50, RSI entre 50 e 70 e volume acima da média de 20 períodos.</li>
+                <li><b>Confirmação:</b> evita entrar em lateralidade; precisa mostrar força, direção e participação de volume ao mesmo tempo.</li>
+                <li><b>Gestão:</b> alvo técnico aproximado de 2,0% e stop de 2,5% no modelo strict, com execução seletiva por ativo.</li>
+                <li><b>Leitura da métrica:</b> 12 gains, 7 losses e PF 3.32x indicam que os acertos históricos pagaram bem mais que os erros.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card setup-card">
+            <div class="setup-top">
+              <div><div class="kicker">Reversão à média</div><h3>Grid Strict</h3></div>
+              <div class="win"><span>Assertividade</span><strong>73.7%</strong></div>
+            </div>
+            <p>Busca exageros de queda em relação à média e tenta capturar o retorno para uma zona mais normal. Alto acerto para reversões bem filtradas.</p>
+            <div class="bar" style="--value: 73.7%"><span></span></div>
+            <div class="metric-row">
+              <div class="metric"><span>Profit</span><strong>14</strong></div>
+              <div class="metric"><span>Loss</span><strong>5</strong></div>
+              <div class="metric"><span>PF</span><strong>1.87x</strong></div>
+              <div class="metric"><span>Amostra</span><strong>19</strong></div>
+            </div>
+            <div class="projection"><div><span>US$ 200</span><strong>US$ 245,76</strong></div><div><span>US$ 1.000</span><strong>US$ 1.228,81</strong></div></div>
+            <div class="tech-details">
+              <strong>Detalhes técnicos</strong>
+              <ul>
+                <li><b>Timeframe:</b> leitura principal em 1h, voltada para reversão à média.</li>
+                <li><b>Entrada:</b> preço fechando abaixo da SMA50 menos 2,2 desvios padrão, com RSI abaixo de 30 no modo strict.</li>
+                <li><b>Objetivo:</b> capturar retorno para a média, não perseguir rompimento de tendência.</li>
+                <li><b>Gestão:</b> saída no retorno à SMA50, alvo de até 2,0%, stop de 3,5% ou encerramento por tempo limite.</li>
+                <li><b>Cuidados:</b> usar apenas em ativos líquidos, com spread controlado, porque queda forte pode continuar antes de reverter.</li>
+                <li><b>Leitura da métrica:</b> 73.7% de assertividade é alto, mas deve ser lido junto com PF 1.87x e custo real de execução.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card setup-card">
+            <div class="setup-top">
+              <div><div class="kicker">Pullback em tendência</div><h3>Zeus Stoch EMA</h3></div>
+              <div class="win"><span>Assertividade</span><strong>69.2-73.1%</strong></div>
+            </div>
+            <p>Espera o mercado respirar dentro de uma tendência e mostrar recuperação antes de entrar. É mais seletivo e funciona melhor com whitelist de ativos.</p>
+            <div class="bar" style="--value: 71%"><span></span></div>
+            <div class="metric-row">
+              <div class="metric"><span>Profit</span><strong>18-19</strong></div>
+              <div class="metric"><span>Loss</span><strong>7-8</strong></div>
+              <div class="metric"><span>R:R ref.</span><strong>1.00x</strong></div>
+              <div class="metric"><span>Amostra</span><strong>26</strong></div>
+            </div>
+            <div class="projection"><div><span>US$ 200</span><strong>US$ 276,80</strong></div><div><span>US$ 1.000</span><strong>US$ 1.384,00</strong></div></div>
+            <div class="tech-details">
+              <strong>Detalhes técnicos</strong>
+              <ul>
+                <li><b>Janela testada:</b> base real de 120 dias, com leitura comparada em Binance e Kraken spot/USD.</li>
+                <li><b>Entrada:</b> procura tendência ainda viva, correção até região de média e sinal de retomada antes de comprar força.</li>
+                <li><b>Filtros:</b> usa leitura de Stoch para identificar o respiro do preço e EMA para confirmar que o pullback ainda está dentro da tendência.</li>
+                <li><b>Validação:</b> Binance marcou 18 profit / 8 loss, enquanto Kraken marcou 19 profit / 7 loss, ambas com amostra de 26 trades.</li>
+                <li><b>Referência conservadora:</b> como o PF final não estava validado no dataset, a simulação usa R:R 1.00x, ou seja, ganho médio igual à perda média.</li>
+                <li><b>Uso ideal:</b> operar com whitelist de ativos e evitar entrada quando a correção já virou perda clara de tendência.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card setup-card">
+            <div class="setup-top">
+              <div><div class="kicker">Reversão 4h</div><h3>DIVAP Reversal</h3></div>
+              <div class="win"><span>Assertividade</span><strong>65.6%</strong></div>
+            </div>
+            <p>Combina perda de força, divergência, volume e região técnica para tentar reversões. Deve ser usado com whitelist, não em qualquer moeda.</p>
+            <div class="bar" style="--value: 65.6%"><span></span></div>
+            <div class="metric-row">
+              <div class="metric"><span>Profit</span><strong>21</strong></div>
+              <div class="metric"><span>Loss</span><strong>11</strong></div>
+              <div class="metric"><span>PF ref.</span><strong>2.83x</strong></div>
+              <div class="metric"><span>Amostra</span><strong>32</strong></div>
+            </div>
+            <div class="projection"><div><span>US$ 200</span><strong>US$ 325,90</strong></div><div><span>US$ 1.000</span><strong>US$ 1.629,52</strong></div></div>
+            <div class="tech-details">
+              <strong>Detalhes técnicos</strong>
+              <ul>
+                <li><b>Timeframe:</b> janela 4h, indicada para reversões mais lentas e com menos ruído que scalps curtos.</li>
+                <li><b>Entrada:</b> combina divergência de RSI, perda de força, volume, região de Fibonacci e candle de reversão.</li>
+                <li><b>Filtro de ativo:</b> não é setup amplo; deve operar somente whitelist com melhor comportamento histórico.</li>
+                <li><b>Melhores bases:</b> SUI/USDT, WLFI/USDT, BNB/USDT e JUP/USDT concentraram os melhores resultados do recorte.</li>
+                <li><b>Gestão:</b> precisa de stop claro por invalidação da reversão, porque reversão falha costuma virar continuação forte.</li>
+                <li><b>Leitura da métrica:</b> PF 2.83x é referência por mediana aproximada, para não inflar a análise por um ativo isolado.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card setup-card">
+            <div class="setup-top">
+              <div><div class="kicker">Reversão intraday</div><h3>Bollinger Mean Reversion</h3></div>
+              <div class="win"><span>Assertividade</span><strong>58.2%</strong></div>
+            </div>
+            <p>Procura afastamentos fortes da média no curto prazo e tenta capturar retorno para equilíbrio. Tem amostra maior e profit factor positivo.</p>
+            <div class="bar" style="--value: 58.2%"><span></span></div>
+            <div class="metric-row">
+              <div class="metric"><span>Profit</span><strong>71</strong></div>
+              <div class="metric"><span>Loss</span><strong>51</strong></div>
+              <div class="metric"><span>PF</span><strong>1.77x</strong></div>
+              <div class="metric"><span>Amostra</span><strong>122</strong></div>
+            </div>
+            <div class="projection"><div><span>US$ 200</span><strong>US$ 264,37</strong></div><div><span>US$ 1.000</span><strong>US$ 1.321,86</strong></div></div>
+            <div class="tech-details">
+              <strong>Detalhes técnicos</strong>
+              <ul>
+                <li><b>Timeframe:</b> 15m, com foco em reversão curta intraday.</li>
+                <li><b>Entrada long:</b> preço fechando na banda inferior de Bollinger com RSI abaixo de 30.</li>
+                <li><b>Entrada short:</b> preço fechando na banda superior de Bollinger com RSI acima de 70.</li>
+                <li><b>Modo strict:</b> exige distância mínima de 0,20 ATR fora da banda para evitar sinais fracos.</li>
+                <li><b>Saída:</b> alvo no retorno à banda média, take profit máximo perto de 2,0%, stop de 1,5% ou timeout de 12 a 16 candles.</li>
+                <li><b>Cuidados:</b> por operar movimentos curtos, taxas, slippage, spread e velocidade de execução pesam mais no resultado real.</li>
+              </ul>
+            </div>
+          </article>
+
+          <article class="card warn">
+            <div class="kicker">Como ler os números</div>
+            <h3>Assertividade não é promessa</h3>
+            <p>Um setup com menor win rate pode ser mais forte se ganha muito mais do que perde. Um setup com alto win rate pode ser fraco se as perdas forem grandes. Por isso o relatório mostra win rate, profit/loss, PF ou referência conservadora, e projeção educativa lado a lado.</p>
+            <div class="tags">
+              <span class="tag amber">100 operações</span>
+              <span class="tag amber">1% de risco</span>
+              <span class="tag red">sem taxas/slippage</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="comparativo">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Comparativo</div>
+            <h2>Dados dos setups direcionais</h2>
+          </div>
+          <p>
+            Tabela consolidada dos setups direcionais. Os valores financeiros são aproximações educativas, sem composição e sem custos reais de execução.
+          </p>
+        </div>
+
+        <div class="table-wrap" role="region" aria-label="Tabela comparativa dos setups">
+          <table>
+            <thead>
+              <tr>
+                <th>Setup</th>
+                <th>Tipo</th>
+                <th>Win Rate</th>
+                <th>Profit</th>
+                <th>Loss</th>
+                <th>PF / Ref.</th>
+                <th>US$ 200</th>
+                <th>US$ 1.000</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Institutional Strict</td><td>Tendência</td><td>63.2%</td><td>12</td><td>7</td><td>3.32x</td><td>US$ 370,75</td><td>US$ 1.853,76</td></tr>
+              <tr><td>Grid Strict</td><td>Reversão à média</td><td>73.7%</td><td>14</td><td>5</td><td>1.87x</td><td>US$ 245,76</td><td>US$ 1.228,81</td></tr>
+              <tr><td>Zeus Stoch EMA</td><td>Pullback em tendência</td><td>69.2%-73.1%</td><td>18-19</td><td>7-8</td><td>R:R 1.00x</td><td>US$ 276,80</td><td>US$ 1.384,00</td></tr>
+              <tr><td>DIVAP Reversal</td><td>Reversão 4h</td><td>65.6%</td><td>21</td><td>11</td><td>2.83x ref.</td><td>US$ 325,90</td><td>US$ 1.629,52</td></tr>
+              <tr><td>Bollinger Mean Reversion</td><td>Reversão intraday</td><td>58.2%</td><td>71</td><td>51</td><td>1.77x</td><td>US$ 264,37</td><td>US$ 1.321,86</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="mqc">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Passo a passo MQC</div>
+            <h2>Como a skill funciona dentro do MQC</h2>
+          </div>
+          <p>
+            No MQC/QuickClaw, a skill não deve ser tratada como script solto. O fluxo correto é abrir o workspace da skill, salvar secrets no ambiente seguro, rodar diagnóstico, fazer dry-run e só liberar live com confirmação explícita.
+          </p>
+        </div>
+
+        <div class="mqc-path">
+          <article class="card special">
+            <div class="kicker">Entrada oficial</div>
+            <h3>Wrapper MQC</h3>
+            <p>Use sempre <code>python3 workspace/run.py</code>. Ele chama o motor interno, prepara dependências, carrega env seguro e aplica bloqueios antes de qualquer comando sensível.</p>
+          </article>
+          <article class="card soft">
+            <div class="kicker">Secrets</div>
+            <h3>Chaves de Serviço</h3>
+            <p>As chaves ficam no MQC em <code>Meu Assistente &gt; Chaves &gt; Chaves de Serviço</code>. Salve um nome por variável e nunca cole private key ou API secret no chat.</p>
+          </article>
+          <article class="card soft">
+            <div class="kicker">Estado</div>
+            <h3>Fora do Git</h3>
+            <p>O runtime usa caminhos seguros como <code>~/.openclaw/state/delta-trade-nado-kraken-mqc/</code> e <code>~/.openclaw/logs/delta-trade-nado-kraken-mqc/</code>.</p>
+          </article>
+        </div>
+
+        <div class="grid cols-3">
+          <article class="card step-card" data-step="01">
+            <div class="kicker">Abrir ambiente</div>
+            <h3>Entre no MQC e abra a skill</h3>
+            <p>Abra o painel do MQC, entre no assistente onde a skill foi instalada e use o terminal do próprio workspace. O comando deve ser rodado na pasta da skill, onde existe <code>workspace/run.py</code>.</p>
+            <ul>
+              <li>Não rode a partir de outra pasta.</li>
+              <li>Não chame <code>workspace/cli.py</code> direto no uso normal.</li>
+              <li>Se o terminal reiniciar, volte para o workspace da skill antes de copiar comandos.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="02">
+            <div class="kicker">Preparar runtime</div>
+            <h3>Faça o primeiro diagnóstico</h3>
+            <p>O primeiro bloco valida Python, paths, dependências e se o wrapper consegue funcionar sem abrir nenhuma operação.</p>
+            <ul>
+              <li><code>setup-check</code> checa runtime e variáveis.</li>
+              <li><code>bootstrap</code> cria/atualiza a <code>.venv</code> local quando necessário.</li>
+              <li><code>doctor</code> roda a checagem operacional completa.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="03">
+            <div class="kicker">Salvar env</div>
+            <h3>Configure as variáveis no MQC</h3>
+            <p>No painel, abra <code>Meu Assistente &gt; Chaves &gt; Chaves de Serviço</code> e cadastre uma variável por vez. O nome deve ser idêntico ao esperado pela skill.</p>
+            <ul>
+              <li>Nado-only: <code>NADO_OWNER_PRIVATE_KEY</code>, <code>NADO_SUBACCOUNT_NAME</code>, <code>NADO_NETWORK</code>.</li>
+              <li>Kraken-only: <code>KRAKEN_API_KEY_</code>, <code>KRAKEN_API_SECRET</code>, <code>KRAKEN_VENUE</code>, <code>KRAKEN_SANDBOX</code>.</li>
+              <li>Hedge: precisa das variáveis da Nado e da Kraken.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="04">
+            <div class="kicker">Como o env entra</div>
+            <h3>Service keys primeiro</h3>
+            <p>Quando o MQC injeta secrets pelo ambiente, o wrapper prioriza essas service keys. Fora do MQC, ele também pode ler arquivo seguro como <code>~/.config/openclaw/delta-trade-nado-kraken-mqc.env</code>.</p>
+            <ul>
+              <li>No MQC, valide presença, não valor.</li>
+              <li>Se faltar algo, corrija pelo painel de chaves.</li>
+              <li>Não salve secrets dentro do repositório.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="05">
+            <div class="kicker">Escolher modo</div>
+            <h3>Defina onde a ordem roda</h3>
+            <p>A skill separa o modo de execução do setup. Primeiro escolha o ambiente da ordem, depois o setup e o sizing.</p>
+            <ul>
+              <li><code>dex_only</code> / <code>nado_only</code>: opera somente Nado DEX.</li>
+              <li><code>cex_only</code> / <code>kraken_only</code>: opera somente Kraken CEX.</li>
+              <li><code>hedged</code>: abre Nado + Kraken em lados opostos para delta neutro.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="06">
+            <div class="kicker">Universo</div>
+            <h3>Valide símbolos antes do live</h3>
+            <p>Antes de usar <code>all</code>, rode uma lista pequena. Para hedge, o ativo precisa existir nas duas venues. Para Nado-only, o foco é o perp disponível na Nado.</p>
+            <ul>
+              <li>Use <code>symbols</code> para ver mercados.</li>
+              <li>Use <code>asset-scan</code> para spread/preço suspeito.</li>
+              <li>Se um ativo estiver ruim, use blacklist temporária.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="07">
+            <div class="kicker">Dry-run</div>
+            <h3>Simule antes de operar</h3>
+            <p>Dry-run monta o plano, mostra bloqueios e valida sizing sem mandar ordem real. É o passo obrigatório entre diagnóstico e live.</p>
+            <ul>
+              <li>Inclua sempre <code>--dry-run</code>.</li>
+              <li>Use setup e símbolo claros no primeiro teste.</li>
+              <li>Leia mensagens de prontidão, bloqueio, stop e alvo.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="08">
+            <div class="kicker">Sizing</div>
+            <h3>Live exige tamanho explícito</h3>
+            <p>O MQC bloqueia live sem sizing definido. Isso evita ordem acidental com tamanho implícito ou perigoso.</p>
+            <ul>
+              <li><code>--notional 20</code>: valor nominal aproximado.</li>
+              <li><code>--margin-usd 5</code>: margem multiplicada pela alavancagem.</li>
+              <li><code>--account-margin-slots 8</code>: divide saldo operacional em slots.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="09">
+            <div class="kicker">Risco</div>
+            <h3>Configure stop e limite</h3>
+            <p>Para primeira execução real, mantenha limite pequeno. A skill aceita presets de stop e limite de operações abertas.</p>
+            <ul>
+              <li>Recomendação inicial: <code>--stop-loss-preset 20</code>.</li>
+              <li>Comece com <code>--max-open-setups 1</code>.</li>
+              <li>Use <code>cross</code> ou <code>isolated</code> sabendo a diferença de margem.</li>
+            </ul>
+          </article>
+
+          <article class="card danger step-card" data-step="10">
+            <div class="kicker">Live</div>
+            <h3>Confirme só na execução aprovada</h3>
+            <p>Trade real só deve rodar após diagnóstico OK, dry-run OK, sizing explícito e confirmação humana. A variável <code>DELTA_NEUTRAL_CONFIRM_LIVE=true</code> entra só no comando aprovado, não como env permanente.</p>
+            <ul>
+              <li>Não deixe confirmação live salva fixa no ambiente.</li>
+              <li>Após executar, rode <code>setup-live-status</code> e <code>live-status</code>.</li>
+              <li>Se houver erro de signer/API, pare e corrija env antes de repetir.</li>
+            </ul>
+          </article>
+
+          <article class="card step-card" data-step="11">
+            <div class="kicker">Dashboard</div>
+            <h3>Acompanhe exposição e monitoradas</h3>
+            <p>O dashboard mostra operações monitoradas, exposição real, setups, alvos e estado. Ele separa o que está no estado do bot do que vem das posições abertas nas exchanges.</p>
+            <ul>
+              <li><code>live-status</code>: exposição real.</li>
+              <li><code>setup-live-status</code>: operações gerenciadas.</li>
+              <li><code>dashboard</code>: gera <code>index.html</code> e <code>dashboard-data.json</code>.</li>
+            </ul>
+          </article>
+
+          <article class="card warn step-card" data-step="12">
+            <div class="kicker">Regra de ouro</div>
+            <h3>Sem segredo no chat</h3>
+            <p>O operador pode confirmar nomes de variáveis, modo, símbolo, setup, sizing e stop. O valor real de private key, API secret, seed ou mnemonic nunca deve aparecer em print, HTML, documento ou conversa.</p>
+            <div class="tags">
+              <span class="tag red">sem private key</span>
+              <span class="tag red">sem API secret</span>
+              <span class="tag amber">validar nomes</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="cmd-grid" style="margin-top: 12px;">
+          <article class="command">
+            <div class="command-head"><strong>Passo 1 - Diagnóstico inicial</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>python3 workspace/run.py setup-check
+python3 workspace/run.py bootstrap
+python3 workspace/run.py doctor</code></pre>
+          </article>
+          <article class="command">
+            <div class="command-head"><strong>Passo 2 - Validar mercado e contas</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>python3 workspace/run.py symbols
+python3 workspace/run.py funding
+python3 workspace/run.py kraken-accounts
+python3 workspace/run.py live-status
+python3 workspace/run.py setup-live-status</code></pre>
+          </article>
+          <article class="command">
+            <div class="command-head"><strong>Passo 3 - Dry-run Nado-only</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>python3 workspace/run.py setup-live --dry-run --setup institutional-strict --symbol SUI/USDT --execution-mode dex_only --margin-mode cross --account-margin-slots 8 --hybrid-profile moderado --stop-loss-preset 20 --max-open-setups 1</code></pre>
+          </article>
+          <article class="command">
+            <div class="command-head"><strong>Passo 4 - Dry-run hedge</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>python3 workspace/run.py setup-live --dry-run --setup delta-neutral --symbol ETH/USDT --execution-mode hedged --nado-margin-usd 5 --kraken-margin-usd 5 --stop-loss-preset 20 --max-open-setups 1</code></pre>
+          </article>
+          <article class="command">
+            <div class="command-head"><strong>Passo 5 - Live somente aprovado</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>DELTA_NEUTRAL_CONFIRM_LIVE=true python3 workspace/run.py setup-live --setup institutional-strict --symbol SUI/USDT --execution-mode dex_only --margin-mode cross --account-margin-slots 8 --hybrid-profile moderado --stop-loss-preset 20 --max-open-setups 1</code></pre>
+          </article>
+          <article class="command">
+            <div class="command-head"><strong>Passo 6 - Dashboard local</strong><button class="copy-button" type="button">Copiar</button></div>
+            <pre><code>python3 workspace/run.py live-status
+python3 workspace/run.py setup-live-status
+python3 workspace/run.py dashboard</code></pre>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="env">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Credenciais e variáveis</div>
+            <h2>O que precisa existir na variável de ambiente</h2>
+          </div>
+          <p>
+            No MQC/OpenClaw, essas chaves devem existir no env/secret manager ou no arquivo seguro configurado para a skill. Secrets não devem aparecer no HTML, Git, prints ou logs públicos.
+          </p>
+        </div>
+
+        <div class="env-grid">
+          <div class="env-box">
+            <strong>Nado</strong>
+            <code>NADO_OWNER_PRIVATE_KEY<br>NADO_LINKED_SIGNER_PRIVATE_KEY<br>NADO_NETWORK=testnet<br>NADO_SUBACCOUNT_NAME=default_1<br>NADO_REQUIRE_LINKED_SIGNER=true</code>
+          </div>
+          <div class="env-box">
+            <strong>Kraken</strong>
+            <code>KRAKEN_API_KEY_<br>KRAKEN_API_KEY<br>KRAKEN_API_SECRET<br>KRAKEN_VENUE=futures<br>KRAKEN_SANDBOX=true</code>
+          </div>
+          <div class="env-box">
+            <strong>Execução</strong>
+            <code>EXECUTION_MODE=hedged<br>MARGIN_MODE=cross<br>MARGIN_USD=<br>DRIFT_BPS=50<br>MAX_PAIR_LOSS_PCT=0.03<br>DELTA_NEUTRAL_CONFIRM_LIVE=false</code>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="risco">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <div class="eyebrow">Risco operacional</div>
+            <h2>O wrapper reduz erro humano, mas não remove risco de mercado</h2>
+          </div>
+          <p>
+            A skill pode operar capital real se configurada para live trading. Por isso, a página separa diagnóstico, simulação, dry-run e live confirmado.
+          </p>
+        </div>
+
+        <div class="grid cols-2">
+          <article class="card danger">
+            <div class="kicker">Nunca faça</div>
+            <h3>Não exponha secrets</h3>
+            <p>Nunca salve private key, seed, mnemonic, keystore ou API secret no Git, em prints, em grupos ou em documentos. Use env/secret manager.</p>
+            <div class="tags">
+              <span class="tag red">sem seed</span>
+              <span class="tag red">sem API secret</span>
+              <span class="tag amber">secret manager</span>
+            </div>
+          </article>
+
+          <article class="card warn">
+            <div class="kicker">Live trading</div>
+            <h3>Use valores pequenos primeiro</h3>
+            <p>Comece em testnet/sandbox, valide por tempo suficiente, rode dry-run e só depois use live com valores pequenos e confirmação explícita na execução aprovada.</p>
+            <div class="tags">
+              <span class="tag amber">testnet</span>
+              <span class="tag amber">sandbox</span>
+              <span class="tag red">confirm live</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="risk-band" style="margin-top:12px">
+          <div class="risk-icon">!</div>
+          <div>
+            <strong>Disclaimer</strong>
+            <p>Este material é educativo. Backtests e operação real são coisas diferentes: no live entram taxas, slippage, latência, funding, liquidação, falha de API e execução parcial. Resultados históricos, win rate e projeções não garantem performance futura.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copiado</div>
+
+  <script>
+    const menuButton = document.getElementById("menuButton");
+    const toast = document.getElementById("toast");
+
+    menuButton.addEventListener("click", () => {
+      document.body.classList.toggle("nav-open");
+    });
+
+    document.querySelectorAll(".nav a").forEach((link) => {
+      link.addEventListener("click", () => document.body.classList.remove("nav-open"));
+    });
+
+    document.querySelectorAll("table").forEach((table) => {
+      const headers = Array.from(table.querySelectorAll("thead th")).map((th) => th.textContent.trim());
+      table.querySelectorAll("tbody tr").forEach((row) => {
+        Array.from(row.children).forEach((cell, index) => {
+          cell.dataset.label = headers[index] || "";
+        });
+      });
+    });
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1600);
+    }
+
+    function selectText(element) {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    async function copyText(text, sourceNode) {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        }
+      } catch {
+        // O navegador embutido pode bloquear clipboard do sistema.
+      }
+      selectText(sourceNode);
+      return "Comando selecionado. Aperte Ctrl+C se precisar.";
+    }
+
+    document.querySelectorAll(".copy-button").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const codeNode = button.closest(".command").querySelector("code");
+        const message = await copyText(codeNode.innerText, codeNode);
+        button.textContent = "Ctrl+C";
+        showToast(message);
+        setTimeout(() => (button.textContent = "Copiar"), 2200);
+      });
+    });
+
+    const canvas = document.getElementById("heroCanvas");
+    const ctx = canvas.getContext("2d");
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+
+    function resizeCanvas() {
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.max(1, Math.floor(width * ratio));
+      canvas.height = Math.max(1, Math.floor(height * ratio));
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    function drawHero() {
+      frame += 1;
+      ctx.clearRect(0, 0, width, height);
+
+      const mid = height * 0.55;
+      const rows = 8;
+      const cols = 28;
+      ctx.lineWidth = 1;
+
+      for (let r = 0; r < rows; r += 1) {
+        const yBase = mid - 190 + r * 52;
+        ctx.beginPath();
+        for (let c = 0; c <= cols; c += 1) {
+          const x = (width / cols) * c;
+          const wave = Math.sin((c * 0.7) + frame * 0.015 + r) * (18 + r * 2);
+          const y = yBase + wave;
+          if (c === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        const alpha = 0.10 + r * 0.018;
+        ctx.strokeStyle = r % 2 === 0 ? `rgba(69,224,131,${alpha})` : `rgba(82,217,255,${alpha})`;
+        ctx.stroke();
+      }
+
+      for (let i = 0; i < 90; i += 1) {
+        const x = (i * 97 + frame * 0.35) % Math.max(width, 1);
+        const y = (Math.sin(i * 1.7 + frame * 0.012) * 0.5 + 0.5) * height;
+        const size = 1 + (i % 3);
+        ctx.fillStyle = i % 4 === 0 ? "rgba(255,204,102,0.35)" : "rgba(69,224,131,0.28)";
+        ctx.fillRect(x, y, size, size);
+      }
+
+      const x1 = width * 0.64;
+      const x2 = width * 0.84;
+      const y1 = height * 0.34 + Math.sin(frame * 0.02) * 18;
+      const y2 = height * 0.62 + Math.cos(frame * 0.018) * 18;
+      ctx.strokeStyle = "rgba(255,255,255,0.24)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(69,224,131,0.92)";
+      ctx.fillRect(x1 - 5, y1 - 5, 10, 10);
+      ctx.fillStyle = "rgba(82,217,255,0.92)";
+      ctx.fillRect(x2 - 5, y2 - 5, 10, 10);
+
+      requestAnimationFrame(drawHero);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    drawHero();
+  </script>
+</body>
+</html>

@@ -1,0 +1,4158 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>VPS + LLM | Command Deck</title>
+  <style>
+    :root {
+      --bg: #090e17;
+      --panel: #0f1623;
+      --panel-2: #131d2d;
+      --panel-3: #182438;
+      --ink: #eef5ff;
+      --muted: #97a6ba;
+      --line: #263449;
+      --line-strong: #3d506d;
+      --blue: #74a9ff;
+      --green: #4ade80;
+      --amber: #f7c948;
+      --rose: #fb7185;
+      --cyan: #22d3ee;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+      --radius: 8px;
+      color-scheme: dark;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f1f5fb;
+      --panel-3: #e9eef7;
+      --ink: #101828;
+      --muted: #5f6f84;
+      --line: #d8e1ee;
+      --line-strong: #bdc9da;
+      --blue: #2563eb;
+      --green: #15803d;
+      --amber: #a16207;
+      --rose: #be123c;
+      --cyan: #0891b2;
+      --shadow: 0 20px 48px rgba(16, 24, 40, 0.12);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(116, 169, 255, 0.14), transparent 36vw),
+        radial-gradient(circle at 88% 10%, rgba(74, 222, 128, 0.08), transparent 32vw),
+        radial-gradient(circle at 50% 100%, rgba(251, 113, 133, 0.06), transparent 38vw),
+        var(--bg);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .deck {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 330px;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .rail,
+    .stage,
+    .mission-aside,
+    .top-strip,
+    .mini-card,
+    .command-card,
+    .check-item,
+    .provider-card {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .rail {
+      position: sticky;
+      top: 16px;
+      height: calc(100vh - 32px);
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+      gap: 14px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      border-radius: var(--radius);
+    }
+
+    .brand:hover {
+      text-decoration: none;
+    }
+
+    .brand:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 4px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .brand-mark img,
+    .brand-mark svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .brand strong,
+    .stage-title strong {
+      display: block;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .brand span,
+    .stage-title span {
+      color: var(--muted);
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .progress-orb {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+    }
+
+    .orb {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--green) 0deg, var(--line) 0deg);
+      position: relative;
+    }
+
+    .orb::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: inherit;
+      background: var(--panel);
+    }
+
+    .orb span {
+      position: relative;
+      z-index: 1;
+      font-weight: 850;
+      font-size: 18px;
+    }
+
+    .progress-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
+    .rail-tools {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rail-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .rail-box-label {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rail-search {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: var(--panel);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .rail-search:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent);
+    }
+
+    .glossary-toggle {
+      width: 100%;
+      justify-content: space-between;
+      padding: 0 12px;
+    }
+
+    .glossary-toggle.active {
+      border-color: var(--blue);
+      background: color-mix(in srgb, var(--blue) 16%, var(--panel-2));
+    }
+
+    .glossary-toggle span {
+      opacity: 0.8;
+    }
+
+    .glossary-stage {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .glossary-hero {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, transparent), transparent 48%),
+        var(--panel-2);
+      padding: 18px;
+    }
+
+    .glossary-hero h1 {
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .letter-index {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+      gap: 6px;
+    }
+
+    .letter-link {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+    }
+
+    .letter-link.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .glossary-sections {
+      display: grid;
+      gap: 14px;
+    }
+
+    .glossary-section {
+      display: grid;
+      gap: 10px;
+    }
+
+    .letter-heading {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .glossary-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .glossary-card strong {
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .glossary-card p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 8px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .stage-phase-label {
+      margin: 10px 8px 4px;
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .stage-button {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 22px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      text-align: left;
+    }
+
+    .stage-button:hover {
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+
+    .stage-button.active {
+      border-color: var(--line-strong);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 9%, var(--panel)), var(--panel-2));
+      color: var(--ink);
+    }
+
+    .stage-button.done .stage-no {
+      background: color-mix(in srgb, var(--green) 18%, var(--panel));
+      color: var(--green);
+    }
+
+    .stage-no {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-3);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 820;
+    }
+
+    .stage-button strong {
+      font-size: 13px;
+      line-height: 1.2;
+      display: block;
+    }
+
+    .stage-button small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stage-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--line-strong);
+      justify-self: center;
+    }
+
+    .stage-button.done .stage-dot {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .rail-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .deck-button,
+    .copy-button,
+    .mode-button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 720;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .deck-button:hover,
+    .copy-button:hover,
+    .mode-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: var(--panel-3);
+    }
+
+    .theme-icon-button {
+      width: 44px;
+      min-width: 44px;
+      padding: 0;
+    }
+
+    .theme-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .theme-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .deck-button.primary {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      color: #06111f;
+      border-color: transparent;
+    }
+
+    .workbench {
+      min-width: 0;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .top-strip {
+      min-height: 84px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: none;
+    }
+
+    .stage-title {
+      min-width: 0;
+    }
+
+    .stage-title strong {
+      font-size: clamp(20px, 3vw, 32px);
+      overflow-wrap: anywhere;
+    }
+
+    .stage-title span {
+      line-height: 1.45;
+      max-width: 760px;
+      overflow-wrap: anywhere;
+    }
+
+    .stage {
+      padding: 18px;
+      min-height: 620px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .stage-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+      gap: 14px;
+    }
+
+    .feature-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, transparent), transparent 48%),
+        var(--panel-2);
+      padding: 18px;
+      min-height: 180px;
+      display: grid;
+      align-content: end;
+    }
+
+    .feature-card .kicker,
+    .mini-label,
+    .card-kicker {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(34px, 5.4vw, 64px);
+      line-height: 1;
+      max-width: 900px;
+    }
+
+    .feature-card h1 {
+      max-width: 100%;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+    }
+
+    .feature-card h1.long-title {
+      font-size: 50px;
+      line-height: 1.03;
+    }
+
+    .feature-card h1.step-title {
+      font-size: clamp(34px, 4vw, 50px);
+      line-height: 1.04;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    h2 {
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .stage-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-card {
+      box-shadow: none;
+      padding: 14px;
+      background: var(--panel-2);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .stage-content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+      gap: 14px;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .stage-content.provider-stage-content {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stage-content.provider-stage-content > .content-column:nth-child(2) {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .content-column {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .command-card {
+      box-shadow: none;
+      overflow: visible;
+      background: #050914;
+      position: relative;
+    }
+
+    :root[data-theme="light"] .command-card {
+      background: #111827;
+    }
+
+    .command-head {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px 0 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #dce7f7;
+      font-size: 12px;
+    }
+
+    .command-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 850;
+    }
+
+    .command-title > span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .command-help {
+      position: relative;
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      color: #93c5fd;
+      background: rgba(147, 197, 253, 0.08);
+      cursor: help;
+    }
+
+    .command-help svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+    }
+
+    .command-help::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: auto;
+      right: 0;
+      top: calc(100% + 9px);
+      z-index: 40;
+      width: min(310px, 72vw);
+      padding: 10px 11px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 8px;
+      background: #e9f0fb;
+      color: #06111f;
+      font-size: 12px;
+      line-height: 1.38;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 700;
+      white-space: normal;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    .command-help:hover::after,
+    .command-help:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .command-help::after,
+    .cell-help::after {
+      display: none;
+    }
+
+    .copy-button {
+      min-height: 30px;
+      padding: 0 10px;
+      color: white;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 15px;
+      color: #e9f0fb;
+      overflow-x: auto;
+      line-height: 1.55;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    .inline-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 1px 5px;
+      font-size: 0.92em;
+    }
+
+    .check-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .check-item {
+      box-shadow: none;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 11px 12px;
+      background: var(--panel-2);
+    }
+
+    .check-item input {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 6px;
+      margin: 0;
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+    }
+
+    .check-item input:checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .check-item input:checked::after {
+      content: "";
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #06111f;
+      border-bottom: 2px solid #06111f;
+      transform: rotate(-45deg);
+      margin-top: -2px;
+    }
+
+    .check-item label {
+      line-height: 1.42;
+      cursor: pointer;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .check-item:has(input:checked) {
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+      background: color-mix(in srgb, var(--green) 10%, var(--panel));
+    }
+
+    .feature-card h1,
+    .mini-card strong {
+      color: var(--ink);
+    }
+
+    .mini-card strong {
+      overflow-wrap: anywhere;
+    }
+
+    :root[data-theme="light"] .feature-card h1,
+    :root[data-theme="light"] .mini-card strong,
+    :root[data-theme="light"] .check-item label {
+      color: #101828;
+    }
+
+    :root[data-theme="light"] .check-item:has(input:checked) label {
+      color: #244034;
+    }
+
+    .note-card {
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      background: color-mix(in srgb, var(--amber) 8%, var(--panel));
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .step-guide {
+      border: 1px solid color-mix(in srgb, var(--blue) 34%, var(--line));
+      border-radius: var(--radius);
+      padding: 14px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--blue) 7%, transparent), transparent 72%),
+        var(--panel-2);
+      display: grid;
+      gap: 12px;
+    }
+
+    .step-guide-head {
+      display: grid;
+      gap: 6px;
+    }
+
+    .step-guide-head strong {
+      font-size: clamp(18px, 1.4vw, 24px);
+      line-height: 1.18;
+    }
+
+    .step-guide-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .substep-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      counter-reset: substep;
+    }
+
+    .substep {
+      counter-increment: substep;
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--panel) 88%, transparent);
+    }
+
+    .substep::before {
+      content: counter(substep, decimal-leading-zero);
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--blue) 16%, var(--panel));
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .substep-body {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .substep-title {
+      color: var(--ink);
+      font-weight: 850;
+      line-height: 1.3;
+      overflow-wrap: anywhere;
+    }
+
+    .substep-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .substep-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 2px 8px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--blue);
+      background: var(--panel);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .substep p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .substep-result {
+      color: var(--ink);
+    }
+
+    .substep-mini-list {
+      margin: 4px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .substep-mini-list li + li {
+      margin-top: 4px;
+    }
+
+    .fallback-panel {
+      border: 1px solid color-mix(in srgb, var(--blue) 34%, var(--line));
+      border-radius: var(--radius);
+      padding: 16px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--blue) 7%, transparent), transparent 70%),
+        var(--panel);
+      display: grid;
+      gap: 14px;
+    }
+
+    .fallback-head {
+      display: grid;
+      gap: 6px;
+      max-width: 760px;
+    }
+
+    .fallback-head strong {
+      font-size: clamp(20px, 1.8vw, 30px);
+      line-height: 1.08;
+    }
+
+    .fallback-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .fallback-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .fallback-grid .command-card:first-child,
+    .fallback-grid .command-card:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .provider-card {
+      box-shadow: none;
+      padding: 14px;
+      background: var(--panel-2);
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .provider-card.active {
+      border-color: color-mix(in srgb, var(--blue) 50%, var(--line));
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--blue) 8%, transparent), transparent 52%),
+        var(--panel-2);
+    }
+
+    .provider-choice {
+      min-height: 32px;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .provider-choice.active {
+      color: #06111f;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+    }
+
+    .provider-hint {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+    }
+
+    .provider-card strong {
+      font-size: 15px;
+    }
+
+    .provider-card p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .link-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .link-card:hover {
+      border-color: var(--line-strong);
+      background: var(--panel-3);
+      text-decoration: none;
+    }
+
+    .link-card strong {
+      font-size: 15px;
+    }
+
+    .link-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .link-card .link-body {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .link-card .link-cta {
+      color: #06111f;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .simple-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      overflow: visible;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      font-size: clamp(14px, 0.82vw, 15.5px);
+    }
+
+    .simple-table th,
+    .simple-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .simple-table th {
+      color: var(--blue);
+      background: var(--panel-2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: clamp(11px, 0.68vw, 12px);
+    }
+
+    .simple-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      max-width: 100%;
+    }
+
+    .table-cell code {
+      font-size: 1em;
+      min-width: 0;
+      white-space: normal;
+      overflow-wrap: break-word;
+      word-break: normal;
+    }
+
+    .table-link {
+      color: var(--blue);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 850;
+    }
+
+    .table-link:hover {
+      color: var(--green);
+    }
+
+    .cell-help {
+      position: relative;
+      flex: 0 0 auto;
+      width: 17px;
+      height: 17px;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      color: var(--blue);
+      background: var(--panel-2);
+      cursor: help;
+      transform: translateY(1px);
+    }
+
+    .cell-help svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+    }
+
+    .cell-help::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 9px);
+      z-index: 20;
+      width: min(270px, 72vw);
+      padding: 9px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 12px;
+      line-height: 1.35;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 650;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: normal;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .cell-help.tip-left::after {
+      left: auto;
+      right: 0;
+    }
+
+    .cell-help:hover::after,
+    .cell-help:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .mission-aside {
+      position: sticky;
+      top: 16px;
+      height: calc(100vh - 32px);
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .aside-block {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 14px;
+    }
+
+    .mission-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .mission-reset {
+      width: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      padding: 0;
+      border-radius: 7px;
+      opacity: 0.52;
+      background: transparent;
+    }
+
+    .mission-reset:hover,
+    .mission-reset:focus-visible {
+      opacity: 1;
+      background: var(--panel);
+    }
+
+    .mission-reset svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .aside-block h3 {
+      margin-bottom: 8px;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .phase-cell {
+      min-height: 44px;
+      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .phase-cell.done {
+      background: color-mix(in srgb, var(--green) 16%, var(--panel));
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+    }
+
+    .phase-cell.reference {
+      color: var(--blue);
+      background: color-mix(in srgb, var(--blue) 8%, var(--panel));
+    }
+
+    .phase-cell.reference.done {
+      background: color-mix(in srgb, var(--green) 16%, var(--panel));
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+    }
+
+    .context-list {
+      display: grid;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .context-item {
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .context-item strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .context-item p {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: var(--bg);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(14px);
+      transition: opacity 160ms ease, transform 160ms ease;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .floating-tip {
+      position: fixed;
+      z-index: 200;
+      max-width: min(320px, calc(100vw - 24px));
+      padding: 10px 11px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 8px;
+      background: #e9f0fb;
+      color: #06111f;
+      font-size: 12px;
+      line-height: 1.38;
+      font-weight: 720;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .floating-tip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-toggle {
+      display: none;
+    }
+
+    @media (max-width: 1700px) {
+      .deck {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .mission-aside {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .deck {
+        grid-template-columns: 260px minmax(0, 1fr);
+      }
+
+      .feature-card h1.long-title {
+        font-size: 46px;
+      }
+
+      .feature-card h1.step-title {
+        font-size: 44px;
+      }
+
+    }
+
+    @media (max-width: 880px) {
+      .deck {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .rail {
+        position: fixed;
+        z-index: 9;
+        inset: 12px auto 12px 12px;
+        width: min(88vw, 330px);
+        height: auto;
+        transform: translateX(calc(-100% - 18px));
+        transition: transform 180ms ease;
+      }
+
+      body.nav-open .rail {
+        transform: translateX(0);
+      }
+
+      .mobile-toggle {
+        display: inline-flex;
+      }
+
+      .top-strip {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+      }
+
+      .top-strip .mode-button {
+        display: none;
+      }
+
+      .stage,
+      .stage-content,
+      .stage-hero,
+      .provider-grid,
+      .fallback-grid,
+      .glossary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: auto;
+      }
+
+      .stage-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card h1.long-title {
+        font-size: 44px;
+      }
+
+      .feature-card h1.step-title {
+        font-size: clamp(34px, 7vw, 44px);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .simple-table,
+      .simple-table thead,
+      .simple-table tbody,
+      .simple-table tr,
+      .simple-table td {
+        display: block;
+      }
+
+      .simple-table {
+        border: 0;
+        background: transparent;
+      }
+
+      .simple-table thead {
+        display: none;
+      }
+
+      .simple-table tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      .simple-table tr {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-2);
+        padding: 10px 12px;
+      }
+
+      .simple-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .simple-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .deck,
+      .workbench,
+      .top-strip,
+      .stage,
+      .stage-hero,
+      .stage-content,
+      .content-column,
+      .feature-card,
+      .step-guide,
+      .mini-card,
+      .command-card,
+      .check-item,
+      .note-card {
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+      }
+
+      .deck {
+        padding: 12px;
+        overflow-x: hidden;
+      }
+
+      .top-strip {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .stage-title span,
+      .stage-title strong,
+      .feature-card p,
+      .feature-card h1,
+      .mini-card strong,
+      .check-item label,
+      .note-card,
+      .link-card,
+      .deck-button {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .stage {
+        padding: 14px;
+        overflow-x: hidden;
+      }
+
+      .feature-card {
+        min-height: auto;
+      }
+
+      .top-strip .deck-button.primary {
+        grid-column: 1 / -1;
+        justify-self: stretch;
+      }
+
+      .stage-footer {
+        flex-direction: column;
+      }
+
+      .stage-footer .deck-button {
+        width: 100%;
+      }
+
+      .feature-card h1.long-title {
+        font-size: 32px;
+        line-height: 1.05;
+      }
+
+      .feature-card h1.step-title {
+        font-size: clamp(30px, 8vw, 38px);
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <aside class="rail" aria-label="Etapas">
+      <a class="brand" href="https://docs.ollama.com/linux" target="_self" rel="noopener noreferrer" aria-label="Abrir documentacao oficial do Ollama Linux" title="Abrir documentacao oficial do Ollama Linux">
+        <div class="brand-mark" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Terminal CLI">
+            <rect x="7" y="12" width="50" height="40" rx="7" fill="#0f172a"/>
+            <rect x="7" y="12" width="50" height="12" rx="7" fill="#2563eb"/>
+            <rect x="7" y="20" width="50" height="6" fill="#2563eb"/>
+            <circle cx="17" cy="18" r="2" fill="#bfdbfe"/>
+            <circle cx="25" cy="18" r="2" fill="#bfdbfe"/>
+            <path d="M19 36l7-6-7-6" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M32 40h14" fill="none" stroke="#e2e8f0" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <strong>VPS + LLM</strong>
+          <span>Ollama local na VPS</span>
+        </div>
+      </a>
+
+      <div class="progress-orb">
+        <div class="orb" id="progressOrb"><span id="progressValue">0%</span></div>
+        <div class="progress-copy">
+          <strong id="progressSummary">0 de 0</strong>
+          <p>Checkpoints concluidos</p>
+        </div>
+      </div>
+
+      <div class="rail-tools">
+        <section class="rail-box" aria-label="Buscar etapas">
+          <div class="rail-box-label">Buscar</div>
+          <input class="rail-search" id="stageSearch" type="search" placeholder="Buscar" aria-label="Buscar" />
+        </section>
+        <section class="rail-box" aria-label="Glossario tecnico">
+          <button class="deck-button glossary-toggle" id="glossaryToggle" type="button" aria-pressed="false">
+            Glossario A-Z <span aria-hidden="true">Abrir</span>
+          </button>
+        </section>
+      </div>
+      <nav class="stage-list" id="stageList" aria-label="Lista de etapas"></nav>
+
+      <div class="rail-actions">
+        <button class="deck-button" id="themeToggle" type="button" aria-label="Alternar para tema claro" title="Alternar para tema claro">
+          <span class="theme-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="workbench">
+      <header class="top-strip">
+        <button class="deck-button mobile-toggle" id="menuButton" type="button">Menu</button>
+        <div class="stage-title">
+          <strong id="topTitle">VPS + LLM</strong>
+          <span id="topSummary">Suba uma VPS segura e adicione LLM local com Ollama.</span>
+        </div>
+        <button class="mode-button theme-icon-button" id="themeToggleTop" type="button" aria-label="Alternar para tema claro" title="Alternar para tema claro">
+          <span class="theme-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </span>
+        </button>
+        <button class="deck-button primary" id="nextTop" type="button">Avancar</button>
+      </header>
+
+      <section class="stage" id="stagePanel" aria-live="polite"></section>
+    </main>
+
+    <aside class="mission-aside" aria-label="Painel de contexto">
+      <div class="aside-block">
+        <div class="mission-head">
+          <div class="mini-label">Mapa da missao</div>
+          <button class="deck-button mission-reset" id="resetProgress" type="button" aria-label="Limpar progresso salvo" title="Limpar progresso salvo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          </button>
+        </div>
+        <div class="phase-grid" id="phaseGrid" style="margin-top:12px;"></div>
+      </div>
+      <div class="aside-block">
+        <div class="mini-label">Estado atual</div>
+        <h3 id="asideTitle" style="margin-top:8px;">Inicio</h3>
+        <p id="asideSummary">Selecione uma etapa para ver comandos, dicas e checklist.</p>
+      </div>
+      <div class="context-list" id="contextList"></div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copiado</div>
+  <div class="floating-tip" id="floatingTip" role="tooltip" aria-hidden="true"></div>
+
+  <script>
+    const oneCommandInstaller = String.raw`tmpfile=$(mktemp) && cat > "$tmpfile" <<'VPS_LLM_SETUP'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+say() {
+  printf "\n==> %s\n" "$1"
+}
+
+ask_text() {
+  prompt="$1"
+  default="$2"
+  answer=""
+  read -rp "$prompt [$default]: " answer
+  if [ -z "$answer" ]; then
+    printf "%s" "$default"
+  else
+    printf "%s" "$answer"
+  fi
+}
+
+restart_ssh() {
+  sshd -t
+  if systemctl list-unit-files | grep -q "^ssh.service"; then
+    systemctl restart ssh
+  else
+    systemctl restart sshd
+  fi
+}
+
+need_root_and_ubuntu() {
+  if [ "$(id -u)" -ne 0 ]; then
+    echo "Rode como root dentro da VPS Ubuntu."
+    echo "Exemplo: ssh root@IP_DA_VPS"
+    exit 1
+  fi
+  if [ ! -r /etc/os-release ] || ! grep -qi "ubuntu" /etc/os-release; then
+    echo "Este comando foi feito para VPS Ubuntu limpa. Cancelei."
+    exit 1
+  fi
+}
+
+need_root_and_ubuntu
+clear || true
+echo "Instalador BAREMETAL COMPLETO para VPS limpa + Ollama + modelo LLM"
+echo "Baremetal aqui significa VPS Ubuntu limpa/do zero, nao servidor fisico."
+echo "O comando para para perguntar somente quando precisa e explica o que responder."
+echo "Perguntas essenciais: usuario sudo, porta SSH, modelo, chave/senha se precisar e FECHAR22 no final."
+echo "O restante sera configurado automaticamente com caminho seguro."
+
+echo
+echo "Pergunta 1/3: nome do usuario sudo para usar no dia a dia."
+echo "Pode apertar Enter para aceitar llmadmin."
+ADMIN_USER=$(ask_text "Usuario sudo da VPS" "llmadmin")
+echo
+echo "Pergunta 2/3: porta SSH segura."
+echo "Pode apertar Enter para aceitar 2222."
+SSH_PORT=$(ask_text "Porta SSH segura" "2222")
+echo
+echo "Pergunta 3/3: modelo Ollama para baixar."
+echo "Para VPS pequena, aceite llama3.2:3b."
+MODEL_NAME=$(ask_text "Modelo Ollama para baixar" "llama3.2:3b")
+
+if ! printf "%s" "$ADMIN_USER" | grep -Eq "^[a-z_][a-z0-9_-]*[$]?$"; then
+  echo "Usuario invalido. Use letras minusculas, numeros, _ ou -."
+  exit 1
+fi
+
+if ! printf "%s" "$SSH_PORT" | grep -Eq "^[0-9]+$" || [ "$SSH_PORT" -lt 1024 ] || [ "$SSH_PORT" -gt 65535 ]; then
+  echo "Porta invalida. Use numero entre 1024 e 65535, exemplo 2222."
+  exit 1
+fi
+
+say "Atualizando Ubuntu e instalando base"
+export DEBIAN_FRONTEND=noninteractive
+apt update
+apt upgrade -y
+apt install -y curl ca-certificates git nano ufw fail2ban unattended-upgrades apt-listchanges htop jq lsb-release openssh-server auditd build-essential
+
+say "Criando usuario sudo"
+if id "$ADMIN_USER" >/dev/null 2>&1; then
+  echo "Usuario $ADMIN_USER ja existe."
+else
+  adduser --disabled-password --gecos "" "$ADMIN_USER"
+fi
+usermod -aG sudo "$ADMIN_USER"
+echo "$ADMIN_USER ALL=(ALL) NOPASSWD: ALL" > "/etc/sudoers.d/$ADMIN_USER"
+chmod 440 "/etc/sudoers.d/$ADMIN_USER"
+
+say "Preparando chave SSH do usuario"
+mkdir -p "/home/$ADMIN_USER/.ssh"
+KEY_READY="no"
+if [ -s /root/.ssh/authorized_keys ]; then
+  cp /root/.ssh/authorized_keys "/home/$ADMIN_USER/.ssh/authorized_keys"
+  KEY_READY="yes"
+  echo "Chave SSH do root copiada para $ADMIN_USER."
+else
+  echo "Nao encontrei chave SSH em /root/.ssh/authorized_keys."
+  echo "Instrucao: cole sua chave publica SSH, a linha que comeca com ssh-ed25519 ou ssh-rsa."
+  echo "No Windows, voce pode ver a chave com: type \$env:USERPROFILE\\.ssh\\id_ed25519.pub"
+  echo "Se deixar vazio, vou pedir uma senha para $ADMIN_USER e manter login por senha temporariamente."
+  SSH_PUBLIC_KEY=""
+  read -rp "Chave publica SSH: " SSH_PUBLIC_KEY
+  if [ -n "$SSH_PUBLIC_KEY" ]; then
+    printf "%s\n" "$SSH_PUBLIC_KEY" > "/home/$ADMIN_USER/.ssh/authorized_keys"
+    KEY_READY="yes"
+  fi
+fi
+
+if [ "$KEY_READY" = "yes" ]; then
+  PASSWORD_AUTH="no"
+else
+  PASSWORD_AUTH="yes"
+  while true; do
+    PASS1=""
+    PASS2=""
+    echo "Instrucao: a senha nao aparece enquanto voce digita; isso e normal."
+    read -rsp "Digite uma senha para $ADMIN_USER: " PASS1
+    echo
+    read -rsp "Repita a senha: " PASS2
+    echo
+    if [ -n "$PASS1" ] && [ "$PASS1" = "$PASS2" ]; then
+      echo "$ADMIN_USER:$PASS1" | chpasswd
+      break
+    fi
+    echo "Senhas vazias ou diferentes. Tente de novo."
+  done
+fi
+
+chown -R "$ADMIN_USER:$ADMIN_USER" "/home/$ADMIN_USER/.ssh"
+chmod 700 "/home/$ADMIN_USER/.ssh"
+if [ -f "/home/$ADMIN_USER/.ssh/authorized_keys" ]; then
+  chmod 600 "/home/$ADMIN_USER/.ssh/authorized_keys"
+fi
+
+say "Configurando SSH seguro"
+mkdir -p /etc/ssh/sshd_config.d
+cat >/etc/ssh/sshd_config.d/99-llm-hardening.conf <<EOF
+Port 22
+Port $SSH_PORT
+PermitRootLogin no
+PasswordAuthentication $PASSWORD_AUTH
+KbdInteractiveAuthentication no
+PubkeyAuthentication yes
+AllowUsers $ADMIN_USER
+MaxAuthTries 3
+MaxSessions 5
+LoginGraceTime 30
+ClientAliveInterval 300
+ClientAliveCountMax 2
+X11Forwarding no
+AllowTcpForwarding local
+AllowAgentForwarding no
+PermitTunnel no
+LogLevel VERBOSE
+EOF
+restart_ssh
+
+say "Configurando firewall, fail2ban e atualizacao automatica"
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow 22/tcp
+ufw allow "$SSH_PORT/tcp"
+ufw --force enable
+cat >/etc/fail2ban/jail.local <<EOF
+[DEFAULT]
+bantime = 1h
+findtime = 10m
+maxretry = 3
+
+[sshd]
+enabled = true
+port = 22,$SSH_PORT
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 24h
+EOF
+systemctl enable --now fail2ban
+systemctl restart fail2ban || true
+cat >/etc/apt/apt.conf.d/20auto-upgrades <<'EOF'
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+EOF
+dpkg-reconfigure -f noninteractive unattended-upgrades || true
+systemctl enable --now unattended-upgrades || true
+
+say "Aplicando hardening de kernel e auditoria"
+cat >/etc/sysctl.d/99-llm-hardening.conf <<'EOF'
+kernel.randomize_va_space = 2
+net.ipv4.tcp_syncookies = 1
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+kernel.yama.ptrace_scope = 2
+kernel.dmesg_restrict = 1
+kernel.kptr_restrict = 2
+fs.protected_hardlinks = 1
+fs.protected_symlinks = 1
+fs.suid_dumpable = 0
+EOF
+sysctl -p /etc/sysctl.d/99-llm-hardening.conf || true
+cat >/etc/audit/rules.d/llm-hardening.rules <<'EOF'
+-w /etc/passwd -p wa -k auth_changes
+-w /etc/shadow -p wa -k auth_changes
+-w /etc/group -p wa -k auth_changes
+-w /etc/ssh/sshd_config -p wa -k ssh_changes
+-w /etc/ssh/sshd_config.d/ -p wa -k ssh_changes
+-w /etc/ufw/ -p wa -k firewall_changes
+-w /etc/crontab -p wa -k cron_changes
+-w /var/spool/cron/ -p wa -k cron_changes
+-w /usr/bin/sudo -p x -k privilege_escalation
+EOF
+systemctl enable --now auditd || true
+
+say "Criando swap automatico se a VPS precisar"
+RAM_MB=$(awk '/MemTotal/ {print int($2/1024)}' /proc/meminfo)
+SWAP_COUNT=$(swapon --show --noheadings | wc -l)
+FREE_ROOT_GB=$(df -BG / | awk 'NR==2 {gsub("G","",$4); print $4}')
+if [ "$RAM_MB" -lt 7500 ] && [ "$SWAP_COUNT" -eq 0 ] && [ "$FREE_ROOT_GB" -ge 10 ]; then
+  fallocate -l 8G /swapfile || dd if=/dev/zero of=/swapfile bs=1G count=8 status=progress
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  if ! grep -q "^/swapfile " /etc/fstab; then
+    echo "/swapfile none swap sw 0 0" >> /etc/fstab
+  fi
+  echo "Swap de 8 GB criado."
+else
+  echo "Swap nao criado: RAM suficiente, swap existente ou pouco disco livre."
+fi
+
+say "Instalando Ollama"
+curl -fsSL https://ollama.com/install.sh | sh
+systemctl enable --now ollama
+
+say "Baixando modelo $MODEL_NAME"
+ollama pull "$MODEL_NAME"
+
+say "Criando comando de atualizacao manual"
+cat >/usr/local/sbin/vps-llm-update <<'UPD_SCRIPT'
+#!/usr/bin/env bash
+set -Eeuo pipefail
+export DEBIAN_FRONTEND=noninteractive
+echo "==> Atualizando Ubuntu"
+apt update
+apt upgrade -y
+apt autoremove -y
+if command -v ollama >/dev/null 2>&1; then
+  echo "==> Atualizando Ollama"
+  curl -fsSL https://ollama.com/install.sh | sh
+  systemctl restart ollama || true
+fi
+echo "==> Atualizacao concluida"
+UPD_SCRIPT
+chmod +x /usr/local/sbin/vps-llm-update
+
+say "Ativando atualizacao automatica semanal do stack LLM"
+cat >/etc/systemd/system/vps-llm-stack-update.service <<'EOF'
+[Unit]
+Description=Atualiza stack VPS LLM
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/vps-llm-update
+EOF
+cat >/etc/systemd/system/vps-llm-stack-update.timer <<'EOF'
+[Unit]
+Description=Roda atualizacao semanal da stack VPS LLM
+
+[Timer]
+OnCalendar=Sun 04:30
+Persistent=true
+RandomizedDelaySec=30m
+
+[Install]
+WantedBy=timers.target
+EOF
+systemctl daemon-reload
+systemctl enable --now vps-llm-stack-update.timer
+
+say "Criando checklist automatico"
+cat >/usr/local/sbin/vps-llm-check <<EOF
+#!/usr/bin/env bash
+set -u
+MODEL_NAME="$MODEL_NAME"
+ADMIN_USER="$ADMIN_USER"
+SSH_PORT="$SSH_PORT"
+pass() { printf "OK   %s\n" "\$1"; }
+fail() { printf "ERRO %s\n" "\$1"; }
+grep -qi ubuntu /etc/os-release && pass "Ubuntu detectado" || fail "Sistema nao parece Ubuntu"
+id "\$ADMIN_USER" >/dev/null 2>&1 && pass "Usuario \$ADMIN_USER existe" || fail "Usuario \$ADMIN_USER nao existe"
+test -f "/etc/sudoers.d/\$ADMIN_USER" && pass "sudo sem senha configurado para \$ADMIN_USER" || fail "sudoers do usuario ausente"
+test -s "/home/\$ADMIN_USER/.ssh/authorized_keys" && pass "Chave SSH do usuario configurada" || fail "Chave SSH do usuario ausente"
+sshd -t >/dev/null 2>&1 && pass "Configuracao SSH valida" || fail "sshd -t falhou"
+grep -q "PermitRootLogin no" /etc/ssh/sshd_config.d/99-llm-hardening.conf && pass "Root SSH bloqueado" || fail "Root SSH nao bloqueado"
+grep -q "Port \$SSH_PORT" /etc/ssh/sshd_config.d/99-llm-hardening.conf && pass "Porta SSH \$SSH_PORT configurada" || fail "Porta SSH nao encontrada"
+grep -q "AllowTcpForwarding local" /etc/ssh/sshd_config.d/99-llm-hardening.conf && pass "Tunel SSH local permitido" || fail "Tunel SSH local nao configurado"
+ufw status | grep -q "Status: active" && pass "UFW ativo" || fail "UFW nao ativo"
+if ufw status | grep -q "11434"; then fail "Porta 11434 apareceu no UFW"; else pass "Ollama 11434 nao esta publico no UFW"; fi
+systemctl is-active --quiet fail2ban && pass "fail2ban ativo" || fail "fail2ban inativo"
+systemctl is-active --quiet auditd && pass "auditd ativo" || fail "auditd inativo"
+systemctl is-active --quiet unattended-upgrades && pass "unattended-upgrades ativo" || fail "unattended-upgrades inativo"
+systemctl is-enabled --quiet vps-llm-stack-update.timer && pass "timer semanal LLM ativo" || fail "timer semanal LLM nao ativo"
+command -v ollama >/dev/null 2>&1 && pass "Ollama instalado" || fail "Ollama nao instalado"
+systemctl is-active --quiet ollama && pass "Servico ollama ativo" || fail "Servico ollama inativo"
+curl -fsS http://localhost:11434/api/tags >/dev/null 2>&1 && pass "API local Ollama responde" || fail "API local Ollama nao responde"
+ollama list | awk '{print \$1}' | grep -qx "\$MODEL_NAME" && pass "Modelo \$MODEL_NAME baixado" || fail "Modelo \$MODEL_NAME nao aparece no ollama list"
+[ -x /usr/local/sbin/vps-llm-update ] && pass "vps-llm-update criado" || fail "vps-llm-update ausente"
+echo
+echo "Se todos os itens principais estao OK, a VPS esta pronta."
+EOF
+chmod +x /usr/local/sbin/vps-llm-check
+
+say "Teste rapido do modelo"
+curl -fsS http://localhost:11434/api/generate \
+  -H "Content-Type: application/json" \
+  -d "{\"model\":\"$MODEL_NAME\",\"prompt\":\"Responda apenas OK\",\"stream\":false}" \
+  >/tmp/ollama-test.json || true
+cat /tmp/ollama-test.json || true
+echo
+
+PUBLIC_IP=$(hostname -I | awk '{print $1}')
+say "Checklist da instalacao"
+/usr/local/sbin/vps-llm-check || true
+
+say "Teste a nova porta antes de fechar a 22"
+echo "Abra OUTRA janela do PowerShell no seu PC e rode:"
+echo "ssh -p $SSH_PORT $ADMIN_USER@$PUBLIC_IP"
+echo
+echo "Instrucao: so digite FECHAR22 se o teste em outra janela funcionou."
+echo "Se funcionou, volte aqui e digite FECHAR22."
+echo "Se nao testou, aperte Enter para manter porta 22 temporariamente."
+CLOSE22=""
+read -rp "Digite FECHAR22 para remover porta 22 agora: " CLOSE22
+if [ "$CLOSE22" = "FECHAR22" ]; then
+  sed -i '/^Port 22$/d' /etc/ssh/sshd_config.d/99-llm-hardening.conf
+  restart_ssh
+  ufw delete allow 22/tcp || true
+  echo "Porta 22 removida."
+else
+  echo "Mantive porta 22 temporariamente."
+  echo "Depois do teste, remova com:"
+  echo "sed -i '/^Port 22$/d' /etc/ssh/sshd_config.d/99-llm-hardening.conf && sshd -t && systemctl restart ssh && ufw delete allow 22/tcp"
+fi
+
+say "Resumo final"
+echo "Usuario sudo: $ADMIN_USER"
+echo "Porta SSH: $SSH_PORT"
+echo "Modelo Ollama: $MODEL_NAME"
+echo "Acesso SSH: ssh -p $SSH_PORT $ADMIN_USER@$PUBLIC_IP"
+echo "Tunel Ollama local: ssh -L 11434:localhost:11434 -p $SSH_PORT $ADMIN_USER@$PUBLIC_IP"
+echo "Atualizar manualmente: sudo vps-llm-update"
+echo "Conferir tudo: sudo vps-llm-check"
+echo "Ver atualizacoes automaticas: systemctl list-timers | grep -E 'apt|vps-llm'"
+echo "Pronto."
+VPS_LLM_SETUP
+bash "$tmpfile"; rm -f "$tmpfile"`;
+
+    const stages = [
+      {
+            "id": "inicio",
+            "no": "00",
+            "phase": "COMECO",
+            "title": "GUIA COMPLETO VPS + LLM",
+            "kicker": "Mapa geral",
+            "summary": "Do zero ate uma VPS Ubuntu limpa com Ollama local, modelo LLM e atualizacao automatica.",
+            "highlight": "Ordem: VPS limpa, baremetal completo, 1 comando, checklist e validacao.",
+            "links": [
+                  {
+                        "label": "Contratar VPS Hostinger (referral)",
+                        "url": "https://www.hostinger.com/br/referral?REFERRALCODE=PHOMANAGEDXK",
+                        "body": "Use este link com o referral PHOMANAGEDXK antes de contratar a VPS."
+                  },
+                  {
+                        "label": "Pagina Servidor VPS Hostinger",
+                        "url": "https://www.hostinger.com/br/servidor-vps?REFERRALCODE=PHOMANAGEDXK",
+                        "body": "Pagina do produto Servidor VPS com o referral PHOMANAGEDXK para comparar planos."
+                  },
+                  {
+                        "label": "Ollama Linux",
+                        "url": "https://docs.ollama.com/linux",
+                        "body": "Instalacao oficial do Ollama em Linux."
+                  },
+                  {
+                        "label": "Open WebUI Quick Start",
+                        "url": "https://docs.openwebui.com/getting-started/quick-start/",
+                        "body": "Instalacao oficial do Open WebUI com Docker."
+                  }
+            ],
+            "checks": [
+                  "Entendi que este guia cria ou prepara uma VPS Ubuntu limpa.",
+                  "Entendi que comandos do PowerShell rodam no meu computador local.",
+                  "Entendi que comandos da VPS rodam somente depois do SSH.",
+                  "Entendi que Ollama local roda na VPS e nao deve ser exposto na internet.",
+                  "Nao vou expor Ollama 11434 publicamente."
+            ],
+            "table": {
+                  "head": [
+                        "Bloco",
+                        "Resultado",
+                        "Ambiente"
+                  ],
+                  "rows": [
+                        [
+                              "PREPARACAO",
+                              "Conta, referral, plano, Ubuntu e dados da VPS.",
+                              "Navegador + painel Hostinger."
+                        ],
+                        [
+                              "ACESSO SSH",
+                              "Chave local, root inicial, usuario llmadmin.",
+                              "PowerShell local + terminal da VPS."
+                        ],
+                        [
+                              "SEGURANCA",
+                              "SSH 2222, root bloqueado, UFW, fail2ban, updates.",
+                              "VPS como root/llmadmin."
+                        ],
+                        [
+                              "LLM LOCAL",
+                              "Ollama + llama3.2:3b + API local segura.",
+                              "VPS e tunel SSH."
+                        ]
+                  ]
+            },
+            "notes": [
+                  "Se ja tem VPS Ubuntu limpa, pule os passos de compra e comece em SSH 01.",
+                  "Este guia agora foca em Ollama local na VPS.",
+                  "O caminho principal e LLM local com Ollama."
+            ]
+      },
+      {
+            "id": "pre-referral",
+            "no": "PRE 01",
+            "phase": "PREPARACAO",
+            "title": "PRE 01 - Abrir link referral",
+            "kicker": "Hostinger",
+            "summary": "Abra o link com referral antes de contratar ou escolher o plano de VPS.",
+            "highlight": "Use o link PHOMANAGEDXK antes de ir para a pagina de Servidor VPS.",
+            "links": [
+                  {
+                        "label": "Contratar VPS Hostinger (referral)",
+                        "url": "https://www.hostinger.com/br/referral?REFERRALCODE=PHOMANAGEDXK",
+                        "body": "Clique aqui primeiro para aplicar o referral PHOMANAGEDXK."
+                  },
+                  {
+                        "label": "Pagina Servidor VPS Hostinger",
+                        "url": "https://www.hostinger.com/br/servidor-vps?REFERRALCODE=PHOMANAGEDXK",
+                        "body": "Depois do referral, use esta pagina para comparar os planos VPS."
+                  }
+            ],
+            "checks": [
+                  "Cliquei no link de referral PHOMANAGEDXK.",
+                  "Abri a pagina Servidor VPS da Hostinger.",
+                  "Estou logado ou pronto para criar conta na Hostinger.",
+                  "Conferi moeda, periodo de contratacao, renovacao e total antes de pagar."
+            ],
+            "notes": [
+                  "O referral precisa ser aberto antes da contratacao para ter mais chance de ser aplicado.",
+                  "Se o navegador abrir nova pagina da Hostinger, continue a contratacao por la."
+            ]
+      },
+      {
+            "id": "pre-plano",
+            "no": "PRE 02",
+            "phase": "PREPARACAO",
+            "title": "PRE 02 - Escolher plano VPS",
+            "kicker": "Recursos",
+            "summary": "Escolha um plano adequado para Ubuntu, seguranca e LLM local leve.",
+            "highlight": "Para Ollama local, prefira 8 GB RAM e 80 GB disco ou mais.",
+            "checks": [
+                  "Escolhi Servidor VPS, nao hospedagem compartilhada.",
+                  "Escolhi pelo menos 4 GB RAM para testes simples.",
+                  "Escolhi 8 GB RAM ou mais se vou usar Ollama com folga.",
+                  "Escolhi pelo menos 80 GB disco se vou baixar modelos locais.",
+                  "Escolhi regiao proxima ao meu publico ou ao meu uso.",
+                  "Revisei preco inicial, renovacao, impostos e periodo contratado."
+            ],
+            "table": {
+                  "head": [
+                        "Uso",
+                        "Minimo",
+                        "Recomendado"
+                  ],
+                  "rows": [
+                        [
+                              "Sem Ollama local",
+                              "2 vCPU, 2-4 GB RAM, 40 GB disco",
+                              "4 GB RAM para folga."
+                        ],
+                        [
+                              "Ollama leve",
+                              "4 vCPU, 8 GB RAM, 80 GB disco",
+                              "Comecar com llama3.2:3b."
+                        ],
+                        [
+                              "Modelos maiores",
+                              "8+ GB RAM e bastante disco",
+                              "Preferir modelo menor ou VPS mais forte."
+                        ]
+                  ]
+            },
+            "notes": [
+                  "VPS sem GPU roda modelos locais em CPU; espere respostas mais lentas.",
+                  "Nao escolha plano so pelo preco promocional: confira o valor de renovacao."
+            ]
+      },
+      {
+            "id": "pre-ubuntu",
+            "no": "PRE 03",
+            "phase": "PREPARACAO",
+            "title": "PRE 03 - Criar VPS Ubuntu",
+            "kicker": "Sistema",
+            "summary": "No painel, finalize a criacao com Ubuntu 24.04 LTS e guarde os dados de acesso.",
+            "highlight": "Sistema recomendado: Ubuntu 24.04 LTS.",
+            "checks": [
+                  "Selecionei Ubuntu 24.04 LTS no sistema operacional.",
+                  "Guardei o IP publico da VPS.",
+                  "Guardei usuario root e senha temporaria, se fornecidos.",
+                  "Adicionei minha chave SSH no onboarding se o painel permitiu.",
+                  "Esperei a VPS ficar ativa antes de tentar conectar.",
+                  "Criei snapshot inicial se o provedor ofereceu essa opcao."
+            ],
+            "table": {
+                  "head": [
+                        "Provedor",
+                        "Onde achar dados",
+                        "O que copiar"
+                  ],
+                  "rows": [
+                        [
+                              "Hostinger",
+                              "hPanel > VPS > Gerenciar > Overview/Settings",
+                              "IP, root, senha, Browser terminal, SSH keys."
+                        ],
+                        [
+                              "Outro provedor",
+                              "Dashboard > Server/Instance",
+                              "IP publico, usuario inicial, senha/chave, firewall."
+                        ]
+                  ]
+            },
+            "notes": [
+                  "Na Hostinger, o Browser terminal pode ajudar se o SSH local falhar.",
+                  "Se criou a VPS com outro sistema, reinstale para Ubuntu antes de seguir."
+            ]
+      },
+      {
+            "id": "ssh-powershell",
+            "no": "SSH 01",
+            "phase": "ACESSO SSH",
+            "title": "SSH 01 - Abrir PowerShell",
+            "kicker": "Windows local",
+            "summary": "Abra a janela de comandos do Windows antes de gerar chave ou conectar na VPS.",
+            "highlight": "PowerShell local mostra algo como PS C:\\Users\\SeuNome>.",
+            "commands": [
+                  {
+                        "label": "Abrir PowerShell pelo Executar",
+                        "tip": "Pressione Win + R, cole powershell e aperte Enter.",
+                        "code": "powershell"
+                  },
+                  {
+                        "label": "Conferir SSH no Windows",
+                        "tip": "Rode no PowerShell local.",
+                        "code": "ssh -V"
+                  }
+            ],
+            "checks": [
+                  "Abri PowerShell pelo Menu Iniciar ou Win + R.",
+                  "Estou no computador local, nao dentro da VPS.",
+                  "ssh -V mostrou uma versao do OpenSSH."
+            ],
+            "notes": [
+                  "Se ssh nao existir, atualize o Windows ou instale OpenSSH Client em Recursos opcionais.",
+                  "Nao cole comandos Linux com sudo no PowerShell local."
+            ]
+      },
+      {
+            "id": "ssh-key",
+            "no": "SSH 02",
+            "phase": "ACESSO SSH",
+            "title": "SSH 02 - Criar chave SSH",
+            "kicker": "Chave local",
+            "summary": "Gere uma chave ed25519 no Windows e copie a chave publica.",
+            "highlight": "Compartilhe apenas id_ed25519.pub; nunca compartilhe id_ed25519.",
+            "commands": [
+                  {
+                        "label": "Criar chave SSH",
+                        "tip": "Troque EMAIL pelo seu e-mail. Aperte Enter para aceitar caminho padrao.",
+                        "code": "ssh-keygen -t ed25519 -C \"EMAIL\""
+                  },
+                  {
+                        "label": "Mostrar chave publica",
+                        "tip": "Copie a linha inteira que comeca com ssh-ed25519.",
+                        "code": "type $env:USERPROFILE\\.ssh\\id_ed25519.pub"
+                  },
+                  {
+                        "label": "Ver pasta das chaves",
+                        "tip": "Use se quiser conferir os arquivos criados.",
+                        "code": "dir $env:USERPROFILE\\.ssh"
+                  }
+            ],
+            "checks": [
+                  "Criei a chave SSH.",
+                  "Copiei a linha ssh-ed25519 da chave publica.",
+                  "Nao copiei nem compartilhei a chave privada.",
+                  "Se o painel da Hostinger tinha SSH keys, colei a chave publica nele."
+            ],
+            "notes": [
+                  "Se ja existe chave, o ssh-keygen pode perguntar se quer sobrescrever. Nao sobrescreva sem ter certeza.",
+                  "Use uma passphrase se quiser protecao extra na chave local."
+            ]
+      },
+      {
+            "id": "ssh-root",
+            "no": "SSH 03",
+            "phase": "ACESSO SSH",
+            "title": "SSH 03 - Entrar como root",
+            "kicker": "Primeiro acesso",
+            "summary": "Conecte na VPS Ubuntu como root para preparar a instalacao.",
+            "highlight": "Mantenha essa janela aberta ate testar o usuario llmadmin na porta 2222.",
+            "commands": [
+                  {
+                        "label": "Entrar como root",
+                        "tip": "Troque IP_DA_VPS pelo IP real da VPS.",
+                        "code": "ssh root@IP_DA_VPS"
+                  },
+                  {
+                        "label": "Validar sistema e recursos",
+                        "tip": "Rode dentro do servidor como root.",
+                        "code": "whoami\npwd\ncat /etc/os-release\nfree -h\ndf -h\nhostname -I"
+                  }
+            ],
+            "checks": [
+                  "Substitui IP_DA_VPS pelo IP real.",
+                  "Aceitei o fingerprint somente se o IP estava certo.",
+                  "Consegui entrar como root.",
+                  "whoami mostrou root.",
+                  "cat /etc/os-release mostrou Ubuntu 24.04 ou Ubuntu compativel.",
+                  "Conferi memoria e disco."
+            ],
+            "notes": [
+                  "Se nao conectar, confira firewall do provedor/rede, senha, IP e se o servidor terminou de iniciar.",
+                  "Na Hostinger, use Browser terminal/noVNC para recuperar acesso se necessario."
+            ]
+      },
+      {
+            "id": "quick-one-command",
+            "no": "BARE 03",
+            "phase": "BAREMETAL COMPLETO",
+            "title": "BARE 03 - Instalar tudo com 1 comando",
+            "kicker": "VPS limpa",
+            "summary": "Cole um unico comando dentro da VPS como root; ele instala tudo necessario para Ollama local e modelo LLM.",
+            "highlight": "Ele pergunta e instrui somente quando precisa: usuario, porta, modelo, chave/senha e FECHAR22. Tambem configura hardening e tunel SSH seguro.",
+            "links": [
+                  {
+                        "label": "Ubuntu automatic updates",
+                        "url": "https://ubuntu.com/server/docs/how-to/software/automatic-updates/",
+                        "body": "Base oficial para unattended-upgrades e atualizacoes automaticas do Ubuntu."
+                  },
+                  {
+                        "label": "Ollama Linux",
+                        "url": "https://docs.ollama.com/linux",
+                        "body": "Instalador oficial usado pelo script para instalar e atualizar Ollama."
+                  },
+                  {
+                        "label": "Ollama API",
+                        "url": "https://docs.ollama.com/api",
+                        "body": "Endpoint usado pelo checklist para testar o modelo local."
+                  }
+            ],
+            "commands": [
+                  {
+                        "label": "1 comando completo na VPS",
+                        "tip": "Entre como root na VPS, cole tudo de uma vez e responda so o que ele perguntar.",
+                        "code": oneCommandInstaller
+                  }
+            ],
+            "tables": [
+                  {
+                        "head": [
+                              "Pergunta",
+                              "Padrao",
+                              "Instrucao"
+                        ],
+                        "rows": [
+                              [
+                                    "Usuario sudo da VPS",
+                                    "llmadmin",
+                                    "Aperte Enter para aceitar ou digite outro usuario."
+                              ],
+                              [
+                                    "Porta SSH segura",
+                                    "2222",
+                                    "Aperte Enter para aceitar; use outra porta se ja tiver padrao proprio."
+                              ],
+                              [
+                                    "Modelo Ollama para baixar",
+                                    "llama3.2:3b",
+                                    "Para VPS pequena, aceite o padrao."
+                              ],
+                              [
+                                    "Chave publica SSH",
+                                    "vazio",
+                                    "Cole ssh-ed25519/ssh-rsa se o script nao achar chave do root."
+                              ],
+                              [
+                                    "Senha do usuario",
+                                    "sem padrao",
+                                    "Aparece so se voce nao colar chave publica SSH."
+                              ],
+                              [
+                                    "FECHAR22",
+                                    "Enter mantem 22",
+                                    "Digite FECHAR22 so depois de testar a porta nova em outra janela."
+                              ]
+                        ]
+                  }
+            ],
+            "checks": [
+                  "Estou dentro da VPS Ubuntu limpa como root.",
+                  "Entendi que baremetal completo aqui e instalacao do zero na VPS.",
+                  "Vou colar o bloco inteiro uma unica vez.",
+                  "Vou responder somente as perguntas que aparecerem.",
+                  "O script instalou Ubuntu base, seguranca, auditd, hardening, Ollama e modelo.",
+                  "O script configurou sudoers do usuario dedicado.",
+                  "O script criou sudo vps-llm-check e sudo vps-llm-update.",
+                  "Testei ssh -p PORTA USUARIO@IP em outra janela antes de digitar FECHAR22."
+            ],
+            "notes": [
+                  "O comando unico instala tudo necessario para Ollama local na VPS.",
+                  "O script instala unattended-upgrades e timer semanal de atualizacao do stack LLM automaticamente.",
+                  "O script nao libera a porta 11434 no firewall.",
+                  "O script permite somente tunel SSH local para acessar Ollama de fora da VPS."
+            ]
+      },
+      {
+            "id": "code-checklist",
+            "no": "BARE 04",
+            "phase": "BAREMETAL COMPLETO",
+            "title": "BARE 04 - Checklist do codigo",
+            "kicker": "Antes de colar",
+            "summary": "Checklist para confirmar que o comando de instalacao cobre todos os passos corretos.",
+            "highlight": "Use este checklist antes e depois de colar o comando na VPS.",
+            "tables": [
+                  {
+                        "head": [
+                              "Item do codigo",
+                              "Por que precisa existir"
+                        ],
+                        "rows": [
+                              [
+                                    "set -Eeuo pipefail",
+                                    "Para parar em erro importante e evitar continuar quebrado."
+                              ],
+                              [
+                                    "id -u",
+                                    "Confirma que esta rodando como root."
+                              ],
+                              [
+                                    "/etc/os-release + ubuntu",
+                                    "Evita rodar em sistema errado."
+                              ],
+                              [
+                                    "apt update / apt upgrade",
+                                    "Atualiza a VPS antes de instalar."
+                              ],
+                              [
+                                    "adduser + usermod -aG sudo",
+                                    "Cria usuario seguro para uso diario."
+                              ],
+                              [
+                                    "/etc/sudoers.d/USUARIO",
+                                    "Garante sudo funcional para o usuario dedicado mesmo usando chave SSH."
+                              ],
+                              [
+                                    "authorized_keys",
+                                    "Configura a chave publica SSH do usuario dedicado."
+                              ],
+                              [
+                                    "PermitRootLogin no",
+                                    "Bloqueia login root por SSH depois da configuracao."
+                              ],
+                              [
+                                    "PasswordAuthentication",
+                                    "Fica no quando tem chave, e yes somente se precisou senha."
+                              ],
+                              [
+                                    "ufw allow PORTA_SSH",
+                                    "Libera a porta SSH nova."
+                              ],
+                              [
+                                    "AllowTcpForwarding local",
+                                    "Mantem tunel SSH para acessar localhost:11434 sem abrir porta publica."
+                              ],
+                              [
+                                    "sem ufw allow 11434",
+                                    "Ollama nao fica publico na internet."
+                              ],
+                              [
+                                    "auditd + /etc/audit/rules.d",
+                                    "Registra mudancas sensiveis em usuarios, SSH, firewall, cron e sudo."
+                              ],
+                              [
+                                    "/etc/sysctl.d/99-llm-hardening.conf",
+                                    "Aplica hardening basico de rede/kernel."
+                              ],
+                              [
+                                    "unattended-upgrades",
+                                    "Ativa atualizacao automatica de seguranca."
+                              ],
+                              [
+                                    "curl -fsSL https://ollama.com/install.sh | sh",
+                                    "Instala Ollama pelo instalador oficial."
+                              ],
+                              [
+                                    "ollama pull MODELO",
+                                    "Baixa o modelo LLM escolhido."
+                              ],
+                              [
+                                    "vps-llm-update",
+                                    "Cria comando de atualizacao manual."
+                              ],
+                              [
+                                    "vps-llm-check",
+                                    "Cria checklist automatico pos-instalacao."
+                              ],
+                              [
+                                    "FECHAR22",
+                                    "Remove porta 22 somente depois do teste em outra janela."
+                              ]
+                        ]
+                  }
+            ],
+            "checks": [
+                  "O codigo comeca criando arquivo temporario com tmpfile=$(mktemp).",
+                  "O codigo verifica root e Ubuntu antes de instalar.",
+                  "O codigo pergunta somente usuario, porta, modelo e chave/senha quando necessario.",
+                  "O codigo configura sudoers do usuario dedicado.",
+                  "O codigo configura authorized_keys do usuario dedicado.",
+                  "O codigo mantem AllowTcpForwarding local para tunel SSH.",
+                  "O codigo configura auditd e sysctl hardening.",
+                  "O codigo nao contem ufw allow 11434.",
+                  "O codigo ativa unattended-upgrades.",
+                  "O codigo instala Ollama e baixa o modelo.",
+                  "O codigo cria vps-llm-check e vps-llm-update.",
+                  "O codigo so remove a porta 22 se eu digitar FECHAR22."
+            ],
+            "commands": [
+                  {
+                        "label": "Checklist automatico depois de instalar",
+                        "tip": "Depois que o comando terminar, rode na VPS para conferir tudo.",
+                        "code": "sudo vps-llm-check"
+                  }
+            ],
+            "notes": [
+                  "Se algum item do checklist der ERRO, corrija antes de fechar a janela root.",
+                  "O item da porta 22 e intencional: ele evita perder acesso SSH durante a primeira instalacao."
+            ]
+      },
+      {
+            "id": "quick-updates",
+            "no": "BARE 05",
+            "phase": "BAREMETAL COMPLETO",
+            "title": "BARE 05 - Atualizar e conferir automatico",
+            "kicker": "Depois da instalacao",
+            "summary": "Use estes comandos para atualizar Ollama/Ubuntu e conferir as atualizacoes automaticas.",
+            "highlight": "Principal: sudo vps-llm-check e sudo vps-llm-update.",
+            "links": [
+                  {
+                        "label": "Ubuntu unattended-upgrades",
+                        "url": "https://ubuntu.com/server/docs/how-to/software/automatic-updates/",
+                        "body": "Documentacao oficial sobre atualizacoes automaticas do Ubuntu."
+                  }
+            ],
+            "commands": [
+                  {
+                        "label": "Conferir se tudo esta correto",
+                        "tip": "Rode sempre que quiser validar a VPS.",
+                        "code": "sudo vps-llm-check"
+                  },
+                  {
+                        "label": "Atualizar manualmente",
+                        "tip": "Atualiza Ubuntu e reinstala/atualiza Ollama pelo instalador oficial.",
+                        "code": "sudo vps-llm-update"
+                  },
+                  {
+                        "label": "Ver atualizacoes automaticas",
+                        "tip": "Confirma unattended-upgrades e timer semanal do stack LLM.",
+                        "code": "systemctl status unattended-upgrades --no-pager\nsystemctl status vps-llm-stack-update.timer --no-pager\nsystemctl list-timers | grep -E 'apt|unattended|vps-llm'"
+                  },
+                  {
+                        "label": "Simular unattended-upgrades",
+                        "tip": "Dry-run para testar configuracao sem alterar nada.",
+                        "code": "sudo unattended-upgrade -v --dry-run"
+                  },
+                  {
+                        "label": "Testar Ollama e modelo",
+                        "tip": "Troque o modelo se voce escolheu outro no instalador.",
+                        "code": "ollama list\ncurl http://localhost:11434/api/generate -H \"Content-Type: application/json\" -d '{\"model\":\"llama3.2:3b\",\"prompt\":\"Responda apenas OK\",\"stream\":false}'"
+                  }
+            ],
+            "checks": [
+                  "sudo vps-llm-check mostra OK nos itens principais.",
+                  "sudo vps-llm-update roda sem erro.",
+                  "unattended-upgrades esta ativo.",
+                  "vps-llm-stack-update.timer esta ativo.",
+                  "Ollama responde em localhost:11434.",
+                  "A porta 11434 nao aparece no UFW."
+            ],
+            "notes": [
+                  "unattended-upgrades cuida das atualizacoes de seguranca do Ubuntu.",
+                  "vps-llm-stack-update.timer roda sudo vps-llm-update semanalmente.",
+                  "Se escolheu outro modelo, troque llama3.2:3b no comando de teste."
+            ]
+      },
+      {
+            "id": "sec-ssh",
+            "no": "SEG 01",
+            "phase": "SEGURANCA",
+            "title": "SEG 01 - Preparar SSH seguro",
+            "kicker": "Portas 22 + 2222",
+            "summary": "Adicione a porta 2222 e bloqueie login root/senha, mantendo 22 temporariamente.",
+            "highlight": "Mantenha Port 22 ate testar Port 2222 em outra janela.",
+            "commands": [
+                  {
+                        "label": "Criar configuracao SSH",
+                        "tip": "Rode como root. Mantem 22 e 2222 temporariamente.",
+                        "code": "cat >/etc/ssh/sshd_config.d/99-llm-hardening.conf <<'EOF'\nPort 22\nPort 2222\nPermitRootLogin no\nPasswordAuthentication no\nKbdInteractiveAuthentication no\nPubkeyAuthentication yes\nAllowUsers llmadmin\nEOF\nsshd -t\nsystemctl restart ssh"
+                  },
+                  {
+                        "label": "Ver portas do SSH",
+                        "tip": "Rode como root.",
+                        "code": "ss -lntp | grep sshd || true\nsystemctl status ssh --no-pager"
+                  }
+            ],
+            "checks": [
+                  "Arquivo 99-llm-hardening.conf criado.",
+                  "sshd -t nao mostrou erro.",
+                  "SSH reiniciou sem derrubar a sessao atual.",
+                  "Porta 22 ainda existe temporariamente.",
+                  "Porta 2222 esta pronta para teste."
+            ],
+            "notes": [
+                  "Se sshd -t mostrar erro, nao reinicie SSH ate corrigir.",
+                  "Esta etapa bloqueia login root depois do restart; por isso o usuario llmadmin precisa estar pronto."
+            ]
+      },
+      {
+            "id": "sec-ufw",
+            "no": "SEG 02",
+            "phase": "SEGURANCA",
+            "title": "SEG 02 - Firewall e fail2ban",
+            "kicker": "UFW",
+            "summary": "Ative firewall permitindo SSH seguro e portas web padrao.",
+            "highlight": "Nao libere 11434 do Ollama.",
+            "commands": [
+                  {
+                        "label": "Configurar UFW",
+                        "tip": "Rode como root. Mantem 22 temporario ate teste final.",
+                        "code": "ufw default deny incoming\nufw default allow outgoing\nufw allow 22/tcp\nufw allow 2222/tcp\nufw allow 80/tcp\nufw allow 443/tcp\nufw --force enable\nufw status verbose"
+                  },
+                  {
+                        "label": "Ativar fail2ban",
+                        "tip": "Rode como root.",
+                        "code": "systemctl enable --now fail2ban\nfail2ban-client status || true\nsystemctl status fail2ban --no-pager"
+                  },
+                  {
+                        "label": "Ativar updates automaticos",
+                        "tip": "Rode como root.",
+                        "code": "dpkg-reconfigure -f noninteractive unattended-upgrades\nsystemctl enable --now unattended-upgrades\nsystemctl status unattended-upgrades --no-pager"
+                  }
+            ],
+            "checks": [
+                  "UFW esta ativo.",
+                  "UFW permite 22 temporariamente.",
+                  "UFW permite 2222.",
+                  "UFW permite 80 e 443 para futuro site/HTTPS.",
+                  "UFW nao permite 11434.",
+                  "fail2ban esta ativo.",
+                  "unattended-upgrades esta ativo."
+            ],
+            "notes": [
+                  "Portas 80/443 so ficam abertas para web/HTTPS; nao instale nada nelas sem necessidade.",
+                  "Ollama sera acessado por localhost ou tunel SSH."
+            ]
+      },
+      {
+            "id": "sec-test",
+            "no": "SEG 03",
+            "phase": "SEGURANCA",
+            "title": "SEG 03 - Testar porta 2222",
+            "kicker": "Outro PowerShell",
+            "summary": "Antes de fechar a porta 22, teste a nova conexao como llmadmin.",
+            "highlight": "Abra outro PowerShell. Nao feche a sessao root antiga.",
+            "commands": [
+                  {
+                        "label": "Testar SSH seguro",
+                        "tip": "Rode no PowerShell local, em uma nova janela.",
+                        "code": "ssh -p 2222 llmadmin@IP_DA_VPS"
+                  },
+                  {
+                        "label": "Validar usuario seguro",
+                        "tip": "Rode dentro da nova sessao SSH como llmadmin.",
+                        "code": "whoami\nsudo -v\ncat /etc/os-release\nexit"
+                  }
+            ],
+            "checks": [
+                  "Abri outro PowerShell local.",
+                  "ssh -p 2222 llmadmin@IP_DA_VPS conectou.",
+                  "whoami mostrou llmadmin.",
+                  "sudo -v funcionou.",
+                  "Voltei para a sessao root antiga para fechar a porta 22."
+            ],
+            "notes": [
+                  "Se este teste falhar, nao feche a porta 22.",
+                  "Corrija chave SSH, UFW ou sshd_config antes de continuar."
+            ]
+      },
+      {
+            "id": "sec-close22",
+            "no": "SEG 04",
+            "phase": "SEGURANCA",
+            "title": "SEG 04 - Fechar porta 22",
+            "kicker": "Depois do teste",
+            "summary": "Remova a porta 22 somente depois da porta 2222 funcionar.",
+            "highlight": "Este passo evita acesso SSH pela porta padrao.",
+            "commands": [
+                  {
+                        "label": "Remover Port 22 do SSH",
+                        "tip": "Rode como root somente depois do teste da 2222.",
+                        "code": "sed -i '/^Port 22$/d' /etc/ssh/sshd_config.d/99-llm-hardening.conf\nsshd -t\nsystemctl restart ssh"
+                  },
+                  {
+                        "label": "Remover 22 do UFW",
+                        "tip": "Rode como root.",
+                        "code": "ufw delete allow 22/tcp\nufw status numbered"
+                  },
+                  {
+                        "label": "Teste final da porta 2222",
+                        "tip": "Rode em PowerShell local.",
+                        "code": "ssh -p 2222 llmadmin@IP_DA_VPS"
+                  }
+            ],
+            "checks": [
+                  "Port 22 foi removida do arquivo de hardening.",
+                  "sshd -t passou depois da remocao.",
+                  "SSH reiniciou.",
+                  "UFW nao mostra allow 22/tcp.",
+                  "ssh -p 2222 llmadmin@IP_DA_VPS ainda funciona."
+            ],
+            "notes": [
+                  "Se ficar sem acesso, use console web/noVNC do provedor para reabrir 22 temporariamente.",
+                  "Snapshots ajudam muito antes deste tipo de alteracao."
+            ]
+      },
+      {
+            "id": "llm-resources",
+            "no": "LLM 01",
+            "phase": "LLM LOCAL",
+            "title": "LLM 01 - Preparar recursos",
+            "kicker": "RAM e disco",
+            "summary": "Entre como llmadmin, confira recursos e crie swap se necessario.",
+            "highlight": "Para VPS pequena, swap de 8 GB ajuda a evitar travamento.",
+            "commands": [
+                  {
+                        "label": "Entrar na VPS segura",
+                        "tip": "Rode no PowerShell local.",
+                        "code": "ssh -p 2222 llmadmin@IP_DA_VPS"
+                  },
+                  {
+                        "label": "Checar recursos",
+                        "tip": "Rode dentro da VPS como llmadmin.",
+                        "code": "free -h\ndf -h\nnproc\nlscpu | sed -n '1,18p'"
+                  },
+                  {
+                        "label": "Criar swap de 8 GB",
+                        "tip": "Rode se sua VPS tem pouca RAM ou swap vazio.",
+                        "code": "sudo fallocate -l 8G /swapfile\nsudo chmod 600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\ngrep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab\nfree -h"
+                  }
+            ],
+            "checks": [
+                  "Entrei como llmadmin pela porta 2222.",
+                  "Conferi RAM, CPU e disco.",
+                  "Criei swap se necessario.",
+                  "df -h ainda mostra espaco livre suficiente."
+            ],
+            "notes": [
+                  "Swap nao deixa LLM rapido; apenas evita que o sistema caia por falta de RAM.",
+                  "Se a VPS tem pouco disco, baixe apenas um modelo por vez."
+            ]
+      },
+      {
+            "id": "llm-ollama",
+            "no": "LLM 02",
+            "phase": "LLM LOCAL",
+            "title": "LLM 02 - Instalar Ollama",
+            "kicker": "Runtime",
+            "summary": "Instale o Ollama e valide o servico systemd.",
+            "highlight": "Ollama responde localmente em localhost:11434.",
+            "links": [
+                  {
+                        "label": "Ollama Linux",
+                        "url": "https://docs.ollama.com/linux",
+                        "body": "Comando oficial de instalacao Linux."
+                  }
+            ],
+            "commands": [
+                  {
+                        "label": "Instalar Ollama",
+                        "tip": "Rode dentro da VPS como llmadmin.",
+                        "code": "curl -fsSL https://ollama.com/install.sh | sh"
+                  },
+                  {
+                        "label": "Validar Ollama",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama -v\nsystemctl status ollama --no-pager\ncurl http://localhost:11434/api/tags"
+                  },
+                  {
+                        "label": "Logs do Ollama",
+                        "tip": "Use se o servico falhar.",
+                        "code": "journalctl -u ollama -n 80 --no-pager"
+                  }
+            ],
+            "checks": [
+                  "Instalador oficial terminou sem erro final.",
+                  "ollama -v mostrou versao.",
+                  "systemctl status ollama respondeu.",
+                  "curl /api/tags respondeu em localhost.",
+                  "Nao abri porta 11434 no firewall."
+            ],
+            "notes": [
+                  "Ollama cria usuario/servico proprio para rodar em segundo plano.",
+                  "Atualizar Ollama depois pode ser feito rodando o install script novamente."
+            ]
+      },
+      {
+            "id": "llm-model",
+            "no": "LLM 03",
+            "phase": "LLM LOCAL",
+            "title": "LLM 03 - Baixar modelo",
+            "kicker": "llama3.2:3b",
+            "summary": "Baixe um modelo leve e teste resposta no terminal.",
+            "highlight": "Padrao seguro para VPS sem GPU: llama3.2:3b.",
+            "commands": [
+                  {
+                        "label": "Baixar modelo leve",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama pull llama3.2:3b"
+                  },
+                  {
+                        "label": "Testar modelo",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama run llama3.2:3b \"Responda em portugues: LLM local OK\""
+                  },
+                  {
+                        "label": "Listar modelos",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama list"
+                  },
+                  {
+                        "label": "Opcional para VPS forte",
+                        "tip": "Use somente se tiver RAM/disco sobrando.",
+                        "code": "ollama pull llama3.1:8b\nollama run llama3.1:8b \"Responda: teste 8b OK\""
+                  }
+            ],
+            "checks": [
+                  "Baixei llama3.2:3b.",
+                  "Modelo respondeu no terminal.",
+                  "ollama list mostrou o modelo baixado.",
+                  "Entendi que llama3.1:8b e opcional e mais pesado."
+            ],
+            "notes": [
+                  "Se demorar muito, nao e necessariamente erro: CPU em VPS pode ser lenta para LLM.",
+                  "Se travar por RAM, volte para modelo menor ou aumente a VPS."
+            ]
+      },
+      {
+            "id": "llm-api",
+            "no": "LLM 04",
+            "phase": "LLM LOCAL",
+            "title": "LLM 04 - Testar API local",
+            "kicker": "localhost:11434",
+            "summary": "Teste a API nativa do Ollama e o endpoint local /v1.",
+            "highlight": "Use localhost dentro da VPS. Nao use IP publico.",
+            "links": [
+                  {
+                        "label": "Ollama API",
+                        "url": "https://docs.ollama.com/api",
+                        "body": "Endpoint /api/generate."
+                  },
+                  {
+                        "label": "Ollama endpoint /v1",
+                        "url": "https://docs.ollama.com/openai",
+                        "body": "Endpoint local /v1/chat/completions."
+                  }
+            ],
+            "commands": [
+                  {
+                        "label": "API nativa",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "curl http://localhost:11434/api/generate -d '{\n  \"model\": \"llama3.2:3b\",\n  \"prompt\": \"Responda somente: API local OK\",\n  \"stream\": false\n}'"
+                  },
+                  {
+                        "label": "Endpoint local /v1",
+                        "tip": "Rode dentro da VPS. Bearer pode ser qualquer texto no Ollama local.",
+                        "code": "curl http://localhost:11434/v1/chat/completions \\\n  -H 'Content-Type: application/json' \\\n  -H 'Authorization: Bearer ollama' \\\n  -d '{\n    \"model\": \"llama3.2:3b\",\n    \"messages\": [{\"role\": \"user\", \"content\": \"Diga: endpoint v1 OK\"}],\n    \"stream\": false\n  }'"
+                  },
+                  {
+                        "label": "Confirmar firewall",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "sudo ufw status numbered\nss -lntp | grep 11434 || true"
+                  }
+            ],
+            "checks": [
+                  "API nativa respondeu.",
+                  "Endpoint local /v1 respondeu.",
+                  "UFW nao mostra 11434 liberada.",
+                  "Entendi que localhost da VPS e diferente de localhost do Windows."
+            ],
+            "notes": [
+                  "Esse endpoint pode ser usado por ferramentas que aceitam base URL customizada.",
+                  "Para acessar do Windows, use tunel SSH no proximo passo."
+            ]
+      },
+      {
+            "id": "llm-tunnel",
+            "no": "LLM 05",
+            "phase": "LLM LOCAL",
+            "title": "LLM 05 - Acessar por tunel",
+            "kicker": "Sem expor 11434",
+            "summary": "Use SSH tunnel para acessar Ollama no Windows com seguranca.",
+            "highlight": "A janela do tunel precisa ficar aberta enquanto voce usa a API.",
+            "commands": [
+                  {
+                        "label": "Abrir tunel SSH",
+                        "tip": "Rode no PowerShell local.",
+                        "code": "ssh -L 11434:localhost:11434 -p 2222 llmadmin@IP_DA_VPS"
+                  },
+                  {
+                        "label": "Testar pelo Windows",
+                        "tip": "Rode em outro PowerShell local enquanto o tunel esta aberto.",
+                        "code": "curl http://localhost:11434/api/generate -d '{\n  \"model\": \"llama3.2:3b\",\n  \"prompt\": \"Responda: tunel funcionando\",\n  \"stream\": false\n}'"
+                  },
+                  {
+                        "label": "URLs para apps locais",
+                        "tip": "Use no aplicativo que aceita endpoint Ollama ou base URL customizada.",
+                        "code": "OLLAMA_BASE_URL=http://localhost:11434\nLOCAL_LLM_BASE_URL=http://localhost:11434/v1"
+                  }
+            ],
+            "checks": [
+                  "Abri o tunel no PowerShell local.",
+                  "Deixei a janela do tunel aberta.",
+                  "Teste curl no Windows respondeu.",
+                  "Nao liberei 11434 no UFW."
+            ],
+            "notes": [
+                  "Se fechar o tunel, o acesso pelo Windows para de funcionar.",
+                  "Esse e o caminho recomendado para uso privado."
+            ]
+      },
+      {
+            "id": "webui-docker",
+            "no": "WEB 01",
+            "phase": "WEB UI",
+            "title": "WEB 01 - Instalar Docker",
+            "kicker": "Opcional",
+            "summary": "Instale Docker para rodar Open WebUI de forma simples.",
+            "highlight": "Se nao quer interface web, pule os passos WEB.",
+            "commands": [
+                  {
+                        "label": "Instalar Docker",
+                        "tip": "Rode dentro da VPS como llmadmin.",
+                        "code": "sudo apt update\nsudo apt install -y docker.io\nsudo systemctl enable --now docker\nsudo docker --version"
+                  }
+            ],
+            "checks": [
+                  "Instalei docker.io.",
+                  "Servico docker esta ativo.",
+                  "sudo docker --version respondeu."
+            ],
+            "notes": [
+                  "Este guia usa sudo docker para evitar depender de logout/login no grupo docker."
+            ]
+      },
+      {
+            "id": "webui-run",
+            "no": "WEB 02",
+            "phase": "WEB UI",
+            "title": "WEB 02 - Subir Open WebUI",
+            "kicker": "localhost:3000",
+            "summary": "Rode Open WebUI conectado ao Ollama local sem expor porta publica.",
+            "highlight": "A Web UI ficara presa em 127.0.0.1:3000 na VPS.",
+            "links": [
+                  {
+                        "label": "Open WebUI Quick Start",
+                        "url": "https://docs.openwebui.com/getting-started/quick-start/",
+                        "body": "Instalacao oficial com Docker."
+                  },
+                  {
+                        "label": "Open WebUI + Ollama",
+                        "url": "https://docs.openwebui.com/getting-started/quick-start/connect-a-provider/starting-with-ollama/",
+                        "body": "Conexao com provider Ollama."
+                  }
+            ],
+            "commands": [
+                  {
+                        "label": "Subir Open WebUI",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "sudo docker run -d \\\n  --name open-webui \\\n  --restart always \\\n  -p 127.0.0.1:3000:8080 \\\n  --add-host=host.docker.internal:host-gateway \\\n  -e OLLAMA_BASE_URL=http://host.docker.internal:11434 \\\n  -v open-webui:/app/backend/data \\\n  ghcr.io/open-webui/open-webui:main"
+                  },
+                  {
+                        "label": "Ver status e logs",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "sudo docker ps\nsudo docker logs --tail 80 open-webui"
+                  }
+            ],
+            "checks": [
+                  "Container open-webui esta rodando.",
+                  "Porta publicada e 127.0.0.1:3000, nao 0.0.0.0.",
+                  "Logs nao mostram erro critico."
+            ],
+            "notes": [
+                  "A primeira inicializacao pode demorar enquanto baixa imagem Docker.",
+                  "Nao exponha Open WebUI sem senha, HTTPS e cuidado com cadastro inicial."
+            ]
+      },
+      {
+            "id": "webui-tunnel",
+            "no": "WEB 03",
+            "phase": "WEB UI",
+            "title": "WEB 03 - Abrir Web UI por tunel",
+            "kicker": "Navegador local",
+            "summary": "Acesse a interface web pelo navegador do Windows usando tunel SSH.",
+            "highlight": "Use http://localhost:3000 no Windows enquanto o tunel estiver aberto.",
+            "commands": [
+                  {
+                        "label": "Tunel para Web UI",
+                        "tip": "Rode no PowerShell local.",
+                        "code": "ssh -L 3000:localhost:3000 -p 2222 llmadmin@IP_DA_VPS"
+                  },
+                  {
+                        "label": "URL no navegador local",
+                        "tip": "Abra no navegador do Windows.",
+                        "code": "http://localhost:3000"
+                  }
+            ],
+            "checks": [
+                  "Abri tunel 3000 no PowerShell local.",
+                  "Acessei http://localhost:3000 no navegador.",
+                  "Criei usuario/senha forte no primeiro acesso.",
+                  "Conferi conexao com Ollama nas configuracoes se necessario."
+            ],
+            "notes": [
+                  "Se fechar o tunel, a Web UI para de abrir pelo Windows.",
+                  "Para dominio publico, configure HTTPS e autenticacao forte antes de liberar."
+            ]
+      },
+      {
+            "id": "ops",
+            "no": "OPS",
+            "phase": "OPERACAO",
+            "title": "Operacao diaria",
+            "kicker": "Uso e manutencao",
+            "summary": "Comandos para usar, atualizar tudo, conferir automatico, ver logs e manter rotina segura.",
+            "highlight": "Use sudo vps-llm-update para atualizar tudo que o instalador controla.",
+            "commands": [
+                  {
+                        "label": "Entrar na VPS",
+                        "tip": "Rode no PowerShell local.",
+                        "code": "ssh -p 2222 llmadmin@IP_DA_VPS"
+                  },
+                  {
+                        "label": "Status rapido",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "free -h\ndf -h\nsudo ufw status numbered\nsystemctl status ollama --no-pager\nollama list"
+                  },
+                  {
+                        "label": "Atualizar tudo manualmente",
+                        "tip": "Rode dentro da VPS. Atualiza Ubuntu e Ollama usando o script criado no instalador rapido.",
+                        "code": "sudo vps-llm-update\nsudo vps-llm-check"
+                  },
+                  {
+                        "label": "Conferir atualizacao automatica",
+                        "tip": "Mostra updates automaticos do Ubuntu e timer semanal do stack LLM.",
+                        "code": "systemctl status unattended-upgrades --no-pager\nsystemctl status vps-llm-stack-update.timer --no-pager\nsystemctl list-timers | grep -E 'apt|unattended|vps-llm'"
+                  },
+                  {
+                        "label": "Ver logs de update automatico",
+                        "tip": "Use se quiser confirmar o que rodou sozinho.",
+                        "code": "sudo tail -n 120 /var/log/unattended-upgrades/unattended-upgrades.log\njournalctl -u vps-llm-stack-update.service -n 120 --no-pager"
+                  },
+                  {
+                        "label": "Forcar so update de Ubuntu",
+                        "tip": "Use quando quiser atualizar pacotes do sistema sem reinstalar Ollama.",
+                        "code": "sudo apt update\nsudo apt upgrade -y\nsudo apt autoremove -y"
+                  },
+                  {
+                        "label": "Forcar so update de Ollama",
+                        "tip": "Use quando quiser reinstalar/atualizar Ollama pelo instalador oficial.",
+                        "code": "curl -fsSL https://ollama.com/install.sh | sh\nsudo systemctl restart ollama\nollama -v"
+                  },
+            ],
+            "checks": [
+                  "Sei entrar por ssh -p 2222.",
+                  "Sei ver status do Ollama.",
+                  "Sei atualizar tudo com sudo vps-llm-update.",
+                  "sudo vps-llm-check mostra OK nos itens principais.",
+                  "unattended-upgrades esta ativo.",
+                  "vps-llm-stack-update.timer esta ativo.",
+                  "Sei ver logs de update automatico.",
+                  "Crio snapshot antes de mudancas arriscadas."
+            ],
+            "notes": [
+                  "O instalador rapido ja cria vps-llm-update e ativa o timer semanal vps-llm-stack-update.timer.",
+                  "unattended-upgrades cuida das atualizacoes de seguranca do Ubuntu automaticamente.",
+                  "Crie snapshot no painel da Hostinger antes de mexer em SSH, firewall, Docker ou modelos grandes.",
+                  "Nao rode comandos destrutivos copiados da internet sem entender o alvo.",
+                  "Se o uso crescer, monitore CPU/RAM/disco e considere VPS mais forte."
+            ]
+      },
+      {
+            "id": "ajuda",
+            "no": "AJUDA",
+            "phase": "AJUDA",
+            "title": "Ajuda completa",
+            "kicker": "Diagnostico",
+            "summary": "Recuperacao para SSH, firewall, Ollama, modelos e Web UI.",
+            "highlight": "Diagnostique antes de reinstalar ou abrir portas.",
+            "commands": [
+                  {
+                        "label": "SSH e firewall",
+                        "tip": "Rode dentro da VPS se ainda tem sessao aberta.",
+                        "code": "sudo sshd -t\nsudo systemctl status ssh --no-pager\nsudo ufw status numbered\nsudo fail2ban-client status || true"
+                  },
+                  {
+                        "label": "Recuperar porta 22 pelo console web",
+                        "tip": "Use se perdeu acesso SSH e entrou pelo Browser terminal/noVNC do provedor. Se estiver como root, remova sudo.",
+                        "code": "sudo ufw allow 22/tcp\nsudo sed -i '1i Port 22' /etc/ssh/sshd_config.d/99-llm-hardening.conf\nsudo sshd -t\nsudo systemctl restart ssh\nsudo ufw status numbered"
+                  },
+                  {
+                        "label": "Ollama",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama -v\nsystemctl status ollama --no-pager\njournalctl -u ollama -n 80 --no-pager\ncurl http://localhost:11434/api/tags"
+                  },
+                  {
+                        "label": "RAM, disco e modelos",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "free -h\ndf -h\nps aux --sort=-%mem | head -12\nollama list"
+                  },
+                  {
+                        "label": "Open WebUI",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "sudo docker ps\nsudo docker logs --tail 80 open-webui\nss -lntp | grep 3000 || true"
+                  }
+            ],
+            "checks": [
+                  "Nao abri 11434 publicamente para resolver pressa.",
+                  "Usei console web do provedor se perdi SSH.",
+                  "Li logs antes de reinstalar Ollama.",
+                  "Conferi RAM/disco antes de baixar outro modelo."
+            ],
+            "table": {
+                  "head": [
+                        "Erro",
+                        "Causa comum",
+                        "Acao"
+                  ],
+                  "rows": [
+                        [
+                              "Ollama nao responde",
+                              "Servico parado",
+                              "systemctl status ollama e journalctl."
+                        ],
+                        [
+                              "Modelo muito lento",
+                              "CPU/RAM insuficiente",
+                              "Use modelo menor ou aumente os recursos da VPS."
+                        ],
+                        [
+                              "Web UI nao abre",
+                              "Tunel fechado ou container parado",
+                              "Reabra tunel e veja docker logs."
+                        ]
+                  ]
+            }
+      },
+      {
+            "id": "final",
+            "no": "FINAL",
+            "phase": "CHECKLIST",
+            "title": "Checklist final",
+            "kicker": "Pronto para uso",
+            "summary": "Confirme que a VPS esta segura e que o LLM local funciona.",
+            "highlight": "VPS pronta quando SSH seguro, UFW, fail2ban e Ollama passarem.",
+            "commands": [
+                  {
+                        "label": "Validacao de seguranca",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "whoami\nsudo sshd -t\nsudo ufw status verbose\nsudo fail2ban-client status || true\nsystemctl status unattended-upgrades --no-pager"
+                  },
+                  {
+                        "label": "Validacao Ollama",
+                        "tip": "Rode dentro da VPS.",
+                        "code": "ollama list\ncurl http://localhost:11434/api/generate -d '{\"model\":\"llama3.2:3b\",\"prompt\":\"Diga FINAL OK\",\"stream\":false}'"
+                  }
+            ],
+            "checks": [
+                  "Consigo acessar com ssh -p 2222 llmadmin@IP_DA_VPS.",
+                  "Root login por SSH esta bloqueado.",
+                  "PasswordAuthentication esta desativado.",
+                  "UFW esta ativo e sem 11434 publica.",
+                  "fail2ban esta ativo.",
+                  "unattended-upgrades esta ativo.",
+                  "Ollama responde em localhost:11434.",
+                  "llama3.2:3b responde.",
+                  "Open WebUI, se instalada, esta atras de tunel ou HTTPS com senha.",
+                  "Criei snapshot final no painel do provedor."
+            ],
+            "notes": [
+                  "Agora voce tem VPS segura, Ollama local, modelo LLM.",
+                  "A partir daqui, documente qualquer mudanca que fizer em SSH, UFW, Docker ou modelos."
+            ]
+      }
+];
+
+    const glossaryTerms = [
+      [
+            "authorized_keys",
+            "Arquivo Linux que guarda chaves publicas autorizadas a entrar por SSH."
+      ],
+      [
+            "fail2ban",
+            "Servico que bloqueia tentativas repetidas de login suspeito."
+      ],
+      [
+            "Firewall",
+            "Filtro que decide quais portas da VPS podem receber conexoes."
+      ],
+      [
+            "Hardening",
+            "Conjunto de ajustes para reduzir risco: SSH por chave, firewall, fail2ban e updates."
+      ],
+      [
+            "Hostinger",
+            "Provedor usado como caminho principal deste guia para criar e gerenciar a VPS."
+      ],
+      [
+            "IP_DA_VPS",
+            "Marcador que deve ser trocado pelo IP publico real da sua VPS."
+      ],
+      [
+            "LLM",
+            "Modelo de linguagem capaz de entender e gerar texto."
+      ],
+      [
+            "llmadmin",
+            "Usuario dedicado deste guia para administrar LLMs sem usar root no dia a dia."
+      ],
+      [
+            "localhost",
+            "Endereco da propria maquina atual. Dentro da VPS, localhost e a VPS; no Windows, localhost e o Windows."
+      ],
+      [
+            "Ollama",
+            "Runtime que baixa e executa modelos locais e oferece API em localhost:11434."
+      ],
+      [
+            "Endpoint /v1 local",
+            "Endpoint local do Ollama em /v1/chat/completions para ferramentas que aceitam base URL customizada."
+      ],
+      [
+            "Open WebUI",
+            "Interface web opcional para conversar com modelos locais pelo Ollama."
+      ],
+      [
+            "Porta 22",
+            "Porta SSH padrao, mantida temporariamente ate a porta nova funcionar."
+      ],
+      [
+            "Porta 2222",
+            "Porta SSH customizada usada neste guia para reduzir ruido de ataques automatizados."
+      ],
+      [
+            "Porta 11434",
+            "Porta padrao do Ollama. Nao deve ser exposta publicamente por padrao."
+      ],
+      [
+            "PowerShell",
+            "Terminal do Windows usado antes de entrar na VPS."
+      ],
+      [
+            "Root",
+            "Usuario administrador total da VPS. Deve ser evitado no uso diario."
+      ],
+      [
+            "SSH",
+            "Protocolo seguro para entrar e controlar a VPS pelo terminal."
+      ],
+      [
+            "SSH tunnel",
+            "Tunel que encaminha uma porta da VPS para seu computador sem abrir a porta na internet."
+      ],
+      [
+            "sshd -t",
+            "Comando que valida a configuracao SSH antes de reiniciar o servico."
+      ],
+      [
+            "Swap",
+            "Espaco em disco usado como memoria auxiliar quando falta RAM."
+      ],
+      [
+            "UFW",
+            "Firewall simples do Ubuntu."
+      ],
+      [
+            "Ubuntu 24.04 LTS",
+            "Sistema Linux recomendado neste guia para a VPS."
+      ],
+      [
+            "unattended-upgrades",
+            "Servico que instala atualizacoes de seguranca automaticamente no Ubuntu."
+      ],
+      [
+            "VPS",
+            "Servidor virtual remoto que fica ligado na internet."
+      ]
+];
+
+    const stateKey = "vps-llm-command-deck:v1";
+    const themeKey = "vps-llm-command-deck-theme:v1";
+    const stageKey = "vps-llm-command-deck-stage:v1";
+    const saved = JSON.parse(localStorage.getItem(stateKey) || "{}");
+    let currentIndex = Math.max(0, stages.findIndex((stage) => stage.id === localStorage.getItem(stageKey)));
+    if (currentIndex < 0) currentIndex = 0;
+    let showingGlossary = false;
+
+    const stageList = document.getElementById("stageList");
+    const stagePanel = document.getElementById("stagePanel");
+    const progressOrb = document.getElementById("progressOrb");
+    const progressValue = document.getElementById("progressValue");
+    const progressSummary = document.getElementById("progressSummary");
+    const topTitle = document.getElementById("topTitle");
+    const topSummary = document.getElementById("topSummary");
+    const phaseGrid = document.getElementById("phaseGrid");
+    const asideTitle = document.getElementById("asideTitle");
+    const asideSummary = document.getElementById("asideSummary");
+    const contextList = document.getElementById("contextList");
+    const stageSearch = document.getElementById("stageSearch");
+    const glossaryToggle = document.getElementById("glossaryToggle");
+    const toast = document.getElementById("toast");
+    const floatingTip = document.getElementById("floatingTip");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function checkId(stage, index, prefix = "check") {
+      return `${stage.id}-${prefix}-${index}`;
+    }
+
+    function providerChoiceId(stage) {
+      return `${stage.id}-provider-choice`;
+    }
+
+    function stageCompleteId(stage) {
+      return `${stage.id}-stage-complete`;
+    }
+
+    function selectedProviderIndex(stage) {
+      if (!stage.providers || !stage.providers.length) return -1;
+      const choice = Number(saved[providerChoiceId(stage)] ?? 0);
+      return Number.isInteger(choice) && choice >= 0 && choice < stage.providers.length ? choice : 0;
+    }
+
+    function allCheckIds() {
+      const ids = [];
+      stages.forEach((stage) => ids.push(...stageCheckIds(stage)));
+      return ids;
+    }
+
+    function stageCheckIds(stage) {
+      const ids = [];
+      (stage.checks || []).forEach((_, index) => ids.push(checkId(stage, index)));
+      if (stage.providers && stage.providers.length) {
+        const providerIndex = selectedProviderIndex(stage);
+        const provider = stage.providers[providerIndex];
+        (provider.checks || []).forEach((_, index) => ids.push(checkId(stage, `${providerIndex}-${index}`, "provider")));
+      }
+      return ids;
+    }
+
+    function stageIsDone(stage) {
+      const ids = stageCheckIds(stage);
+      if (ids.length) return ids.every((id) => saved[id]);
+      return Boolean(saved[stageCompleteId(stage)]);
+    }
+
+    function markReferenceStageDone(stage) {
+      if (stageCheckIds(stage).length) return;
+      saved[stageCompleteId(stage)] = true;
+      localStorage.setItem(stateKey, JSON.stringify(saved));
+    }
+
+    function sortedGlossaryTerms() {
+      return [...glossaryTerms].sort((a, b) => a[0].localeCompare(b[0], "pt-BR", { sensitivity: "base" }));
+    }
+
+    function glossaryLetter(term) {
+      const first = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+      return /^[A-Z]$/.test(first) ? first : "#";
+    }
+
+    function glossaryGroups() {
+      return sortedGlossaryTerms().reduce((groups, item) => {
+        const letter = glossaryLetter(item[0]);
+        groups[letter] = groups[letter] || [];
+        groups[letter].push(item);
+        return groups;
+      }, {});
+    }
+
+    function renderGlossaryStage() {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const groups = glossaryGroups();
+      const letterIndex = alphabet
+        .map((letter) => groups[letter]
+          ? `<a class="letter-link" href="#letter-${letter}">${letter}</a>`
+          : `<span class="letter-link disabled">${letter}</span>`)
+        .join("");
+      const sections = alphabet
+        .filter((letter) => groups[letter])
+        .map((letter) => `
+          <section class="glossary-section" id="letter-${letter}">
+            <div class="letter-heading">${letter}</div>
+            <div class="glossary-grid">
+              ${groups[letter].map(([term, description]) => `
+                <article class="glossary-card">
+                  <strong>${escapeHtml(term)}</strong>
+                  <p>${escapeHtml(description)}</p>
+                </article>
+              `).join("")}
+            </div>
+          </section>
+        `)
+        .join("");
+
+      topTitle.textContent = "Glossario tecnico A-Z";
+      topSummary.textContent = `${glossaryTerms.length} termos tecnicos explicados em uma frase.`;
+
+      stagePanel.innerHTML = `
+        <div class="glossary-stage">
+          <div class="glossary-hero">
+            <div class="kicker">Glossario tecnico</div>
+            <h1>Indice A-Z</h1>
+            <p>Termos da instalacao explicados de forma direta, sem depender de outro termo tecnico para entender.</p>
+            <button class="deck-button" id="backToGuide" type="button">Voltar ao passo atual</button>
+          </div>
+          <div class="letter-index" aria-label="Indice alfabetico">${letterIndex}</div>
+          <div class="glossary-sections">${sections}</div>
+          <div class="stage-footer">
+            <button class="deck-button" id="backToGuideFooter" type="button">Voltar ao guia</button>
+            <button class="deck-button primary" id="nextFromGlossary" type="button">Avancar</button>
+          </div>
+        </div>
+      `;
+
+      ["backToGuide", "backToGuideFooter"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", () => {
+          showingGlossary = false;
+          render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      document.getElementById("nextFromGlossary").addEventListener("click", () => moveStage(1));
+    }
+
+    function renderRail() {
+      const query = stageSearch.value.trim().toLowerCase();
+      glossaryToggle.classList.toggle("active", showingGlossary);
+      glossaryToggle.setAttribute("aria-pressed", String(showingGlossary));
+      glossaryToggle.querySelector("span").textContent = showingGlossary ? "Fechar" : "Abrir";
+      const visibleStages = stages
+        .map((stage, index) => ({ stage, index }))
+        .filter(({ stage }) => !query || `${stage.phase || ""} ${stage.title} ${stage.summary} ${stage.kicker}`.toLowerCase().includes(query));
+      let lastPhase = "";
+      stageList.innerHTML = visibleStages
+        .map(({ stage, index }) => {
+          const done = stageIsDone(stage);
+          const active = !showingGlossary && index === currentIndex;
+          const phase = stage.phase || "GUIA";
+          const phaseHeader = phase !== lastPhase ? `<div class="stage-phase-label">${escapeHtml(phase)}</div>` : "";
+          lastPhase = phase;
+          return `${phaseHeader}<button class="stage-button ${active ? "active" : ""} ${done ? "done" : ""}" type="button" data-stage="${index}">
+            <span class="stage-no">${escapeHtml(stage.no)}</span>
+            <span><strong>${escapeHtml(stage.title)}</strong><small>${escapeHtml(stage.kicker)}</small></span>
+            <span class="stage-dot" aria-hidden="true"></span>
+          </button>`;
+        })
+        .join("");
+
+      stageList.querySelectorAll("[data-stage]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentIndex = Number(button.dataset.stage);
+          showingGlossary = false;
+          document.body.classList.remove("nav-open");
+          render();
+        });
+      });
+
+      const activeStageButton = stageList.querySelector(".stage-button.active");
+      if (activeStageButton) {
+        requestAnimationFrame(() => {
+          activeStageButton.scrollIntoView({ block: "nearest", inline: "nearest" });
+        });
+      }
+    }
+
+    function commandText(code) {
+      return String(code || "").replace(/(^|[^\\])\\n/g, (_, prefix) => `${prefix}\n`);
+    }
+
+    function commandTip(command) {
+      const code = commandText(command.code || "");
+      const label = command.label || "Comando";
+      const lower = code.toLowerCase();
+
+      if (command.tip) return command.tip;
+      if (lower.includes("ssh -l") || lower.startsWith("ssh ") || lower.includes("ssh -p")) {
+        return "Rode no PowerShell do Windows local quando o comando for de conexao ou tunel SSH.";
+      }
+      if (lower.includes("ufw ") || lower.includes("sshd -t") || lower.includes("fail2ban") || lower.includes("unattended-upgrades")) {
+        return "Rode dentro da VPS Ubuntu. Confira o passo antes de alterar SSH ou firewall.";
+      }
+      if (lower.includes("ollama") || lower.includes("localhost:11434")) {
+        return "Rode dentro da VPS, exceto quando a etapa disser para testar pelo Windows usando tunel SSH.";
+      }
+      if (lower.includes("docker") || lower.includes("open-webui")) {
+        return "Rode dentro da VPS. Por padrao, a Web UI fica em localhost e deve ser acessada por tunel.";
+      }
+      return `Antes de colar "${label}", confira se o comando e do PowerShell local ou do terminal SSH da VPS.`;
+    }
+
+    function commandHtml(command) {
+      const tip = commandTip(command);
+      return `<div class="command-card">
+        <div class="command-head">
+          <span class="command-title">
+            <span>${escapeHtml(command.label)}</span>
+            <span class="command-help" tabindex="0" aria-label="${escapeHtml(tip)}" data-tip="${escapeHtml(tip)}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span>
+          </span>
+          <button class="copy-button" type="button">Copiar</button>
+        </div>
+        <pre><code>${escapeHtml(commandText(command.code))}</code></pre>
+      </div>`;
+    }
+
+    function commandEnvironment(command) {
+      const tip = commandTip(command);
+      const lower = tip.toLowerCase();
+      if (lower.includes("powershell") || lower.includes("windows local")) return "PowerShell local";
+      if (lower.includes("tunel")) return "PowerShell local + VPS";
+      if (lower.includes("vps")) return "Terminal SSH da VPS";
+      if (lower.includes("navegador")) return "Navegador";
+      return "Conferir ambiente";
+    }
+
+    function expectedCommandResult(command) {
+      const code = commandText(command.code || "").toLowerCase();
+      const label = String(command.label || "").toLowerCase();
+      if (code.includes("tmpfile=$(mktemp)")) return "O instalador pergunta somente o necessario, instala seguranca, Ollama, modelo e scripts de update/check.";
+      if (code.includes("ssh-keygen")) return "O Windows cria uma chave SSH em C:\\Users\\SeuNome\\.ssh sem mostrar erro.";
+      if (code.includes("id_ed25519.pub") || code.includes("authorized_keys")) return "A chave publica aparece na tela ou fica instalada no usuario correto.";
+      if (code.startsWith("ssh ") || code.includes("\nssh ")) return "O terminal entra na VPS ou abre um tunel e fica aguardando enquanto a conexao estiver ativa.";
+      if (code.includes("vps-llm-check")) return "O checklist automatico mostra OK nos itens principais ou indica exatamente o que corrigir.";
+      if (code.includes("vps-llm-update")) return "Ubuntu, Ollama e checagens do stack rodam sem erro.";
+      if (code.includes("ufw status") || code.includes("ufw allow") || code.includes("ufw delete")) return "O UFW mostra somente as portas esperadas, sem abrir 11434 publicamente.";
+      if (code.includes("sshd -t")) return "O comando nao imprime erro; se imprimir, pare e corrija antes de reiniciar SSH.";
+      if (code.includes("fail2ban")) return "O fail2ban aparece ativo ou mostra status sem quebrar o restante do passo.";
+      if (code.includes("unattended-upgrades") || code.includes("list-timers")) return "Atualizacoes automaticas aparecem ativas no systemd.";
+      if (code.includes("ollama pull")) return "O modelo baixa ate 100% e fica listado em ollama list.";
+      if (code.includes("ollama run")) return "O modelo responde no terminal; use Ctrl+C para sair se ficar em modo conversa.";
+      if (code.includes("ollama.com/install.sh")) return "Ollama instala ou atualiza, o servico reinicia e ollama -v responde.";
+      if (code.includes("localhost:11434") || code.includes("/api/generate") || code.includes("/v1/chat/completions")) return "A resposta vem em JSON ou texto do modelo, usando localhost e nao IP publico.";
+      if (code.includes("docker run")) return "O Docker retorna um ID de container e o Open WebUI fica preso em 127.0.0.1:3000.";
+      if (code.includes("docker ps") || code.includes("docker logs")) return "O container aparece em execucao e os logs nao mostram erro critico.";
+      if (code.includes("apt update") || code.includes("apt install") || code.includes("apt upgrade")) return "O apt termina sem erro e volta para o prompt.";
+      if (code.includes("free -h") || code.includes("df -h") || code.includes("nproc")) return "Voce ve RAM, disco, CPU e pode decidir se o modelo cabe na VPS.";
+      if (label.includes("status") || label.includes("logs")) return "Os servicos e logs aparecem para diagnosticar sem reinstalar tudo.";
+      return "O comando termina sem erro e volta para o prompt certo antes de voce avancar.";
+    }
+
+    function stageEnvironment(stage) {
+      const phase = stage.phase || "";
+      if (phase === "PREPARACAO") return "Navegador + painel da VPS";
+      if (phase === "ACESSO SSH") return "PowerShell local";
+      if (phase === "BAREMETAL COMPLETO") return "Root na VPS";
+      if (phase === "SEGURANCA") return "VPS + segundo PowerShell";
+      if (phase === "LLM LOCAL") return "Terminal SSH da VPS";
+      if (phase === "WEB UI") return "VPS + tunel SSH";
+      if (phase === "OPERACAO") return "Rotina na VPS";
+      if (phase === "AJUDA") return "Diagnostico";
+      if (phase === "CHECKLIST") return "Revisao final";
+      return "Leitura";
+    }
+
+    function miniListHtml(items) {
+      if (!items || !items.length) return "";
+      return `<ul class="substep-mini-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    }
+
+    function substepHtml(step) {
+      const chips = [step.env, step.kind].filter(Boolean).map((chip) => `<span class="substep-chip">${escapeHtml(chip)}</span>`).join("");
+      return `<li class="substep">
+        <div class="substep-body">
+          <div class="substep-title">${escapeHtml(step.title)}</div>
+          ${chips ? `<div class="substep-meta">${chips}</div>` : ""}
+          <p>${escapeHtml(step.body)}</p>
+          ${step.result ? `<p class="substep-result"><strong>Resultado esperado:</strong> ${escapeHtml(step.result)}</p>` : ""}
+          ${miniListHtml(step.items)}
+        </div>
+      </li>`;
+    }
+
+    function stageGuideSteps(stage) {
+      const steps = [];
+      const commands = stage.commands || [];
+      const links = stage.links || [];
+      const checks = stage.checks || [];
+      const notes = stage.notes || [];
+      const tables = [stage.table, ...(stage.tables || [])].filter(Boolean);
+
+      steps.push({
+        title: `Entenda a etapa ${stage.no}`,
+        env: "Leitura",
+        kind: stageEnvironment(stage),
+        body: `${stage.summary} Foco: ${stage.highlight}`,
+        result: "Voce sabe qual janela usar e qual resultado precisa ver antes de avancar."
+      });
+
+      links.forEach((link, index) => {
+        steps.push({
+          title: `Abrir link ${index + 1}: ${link.label}`,
+          env: "Navegador",
+          kind: "Referencia",
+          body: link.body || "Abra o link recomendado e volte para este guia depois de conferir.",
+          result: "Voce confirmou a informacao no site certo antes de executar comandos."
+        });
+      });
+
+      tables.forEach((table, index) => {
+        steps.push({
+          title: `Ler tabela de referencia ${index + 1}`,
+          env: "Neste guia",
+          kind: "Conferencia",
+          body: `Use a tabela com as colunas ${table.head.join(", ")} para decidir o caminho correto.`,
+          result: "Voce entende o que preencher, qual ambiente usar e o que esperar."
+        });
+      });
+
+      if (stage.providers && stage.providers.length) {
+        steps.push({
+          title: "Escolher o caminho desta etapa",
+          env: "Neste guia",
+          kind: "Decisao",
+          body: "Clique em Usar este caminho no card correto. O deck conta somente os checkpoints do caminho selecionado.",
+          result: "A etapa mostra apenas os comandos e checkpoints do caminho escolhido."
+        });
+      }
+
+      commands.forEach((command, index) => {
+        steps.push({
+          title: `Executar comando ${index + 1}: ${command.label}`,
+          env: commandEnvironment(command),
+          kind: "Comando",
+          body: `${commandTip(command)} Clique em Copiar. Se o botao mostrar Ctrl+C, o comando ficou selecionado: aperte Ctrl+C manualmente e cole no terminal correto.`,
+          result: expectedCommandResult(command)
+        });
+      });
+
+      if (notes.length) {
+        steps.push({
+          title: "Ler avisos antes de avancar",
+          env: "Neste guia",
+          kind: "Cuidado",
+          body: "Leia os avisos amarelos da etapa. Eles explicam riscos, atalhos seguros e quando nao seguir em frente.",
+          result: "Voce evita expor portas, fechar SSH cedo demais ou baixar modelo pesado demais.",
+          items: notes
+        });
+      }
+
+      if (checks.length) {
+        steps.push({
+          title: "Marcar checkpoints da etapa",
+          env: "Neste guia",
+          kind: "Progresso",
+          body: "Marque cada checkpoint somente depois de ver o resultado no navegador, no painel da VPS ou no terminal correto.",
+          result: "O progresso fica salvo neste navegador e a proxima etapa fica mais clara.",
+          items: checks
+        });
+      } else {
+        steps.push({
+          title: "Avancar com consciencia",
+          env: "Neste guia",
+          kind: "Progresso",
+          body: "Esta etapa e de consulta. Leia o conteudo e clique em Avancar quando fizer sentido.",
+          result: "O deck registra a etapa de referencia como concluida ao avancar."
+        });
+      }
+
+      return steps;
+    }
+
+    function stageGuideHtml(stage) {
+      const steps = stageGuideSteps(stage);
+      return `<section class="step-guide" aria-label="Passo a passo detalhado">
+        <div class="step-guide-head">
+          <div class="kicker">Passo a passo detalhado</div>
+          <strong>Siga estes subpassos em ordem</strong>
+          <p>Feito para iniciante: leia a acao, confira o ambiente e so marque o checklist depois do resultado esperado.</p>
+        </div>
+        <ol class="substep-list">${steps.map(substepHtml).join("")}</ol>
+      </section>`;
+    }
+
+    function checkHtml(id, label) {
+      return `<div class="check-item">
+        <input id="${escapeHtml(id)}" type="checkbox" ${saved[id] ? "checked" : ""} />
+        <label for="${escapeHtml(id)}">${escapeHtml(label)}</label>
+      </div>`;
+    }
+
+    function tableCellValue(cell) {
+      return typeof cell === "object" && cell !== null ? cell.text : cell;
+    }
+
+    function tableCellTip(cell) {
+      return typeof cell === "object" && cell !== null ? cell.tip : "";
+    }
+
+    function tableCellUrl(cell) {
+      return typeof cell === "object" && cell !== null ? cell.url : "";
+    }
+
+    function tableCellHtml(cell, label, cellIndex, totalCells) {
+      const value = tableCellValue(cell);
+      const tip = tableCellTip(cell);
+      const url = tableCellUrl(cell);
+      const edgeClass = cellIndex === totalCells - 1 ? " tip-left" : "";
+      const help = tip ? `<span class="cell-help${edgeClass}" tabindex="0" aria-label="${escapeHtml(tip)}" data-tip="${escapeHtml(tip)}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span>` : "";
+      const content = url
+        ? `<a class="table-link" href="${escapeHtml(url)}" target="_self" rel="noopener noreferrer"><code>${escapeHtml(value)}</code></a>`
+        : `<code>${escapeHtml(value)}</code>`;
+      return `<td data-label="${escapeHtml(label || "")}"><span class="table-cell">${content}${help}</span></td>`;
+    }
+
+    function tableHtml(table) {
+      if (!table) return "";
+      return `<table class="simple-table">
+        <thead><tr>${table.head.map((head) => `<th>${escapeHtml(head)}</th>`).join("")}</tr></thead>
+        <tbody>${table.rows.map((row) => `<tr>${row.map((cell, cellIndex) => tableCellHtml(cell, table.head[cellIndex], cellIndex, row.length)).join("")}</tr>`).join("")}</tbody>
+      </table>`;
+    }
+
+    function linksHtml(stage) {
+      if (!stage.links) return "";
+      return stage.links.map((link) => `
+        <a class="link-card" href="${escapeHtml(link.url)}" target="_self" rel="noopener noreferrer" aria-label="Abrir ${escapeHtml(link.label)}">
+          <div class="card-kicker">Link recomendado</div>
+          <div class="link-title">
+            <strong>${escapeHtml(link.label)}</strong>
+            <span class="link-cta" aria-hidden="true">ABRIR LINK</span>
+          </div>
+          <span class="link-body">${escapeHtml(link.body || link.url)}</span>
+        </a>
+      `).join("");
+    }
+
+    function tablesHtml(stage) {
+      return [stage.table, ...(stage.tables || [])].map(tableHtml).join("");
+    }
+
+    function providersHtml(stage) {
+      if (!stage.providers) return "";
+      const activeProviderIndex = selectedProviderIndex(stage);
+      return `<div class="provider-grid">${stage.providers.map((provider, providerIndex) => {
+        const active = providerIndex === activeProviderIndex;
+        const providerChecks = (provider.checks || []).map((check, index) => checkHtml(checkId(stage, `${providerIndex}-${index}`, "provider"), check)).join("");
+        const extraCommands = active ? (provider.extraCommands || []).map(commandHtml).join("") : "";
+        return `
+        <article class="provider-card ${active ? "active" : ""}">
+          <div class="card-kicker">Caminho ${providerIndex + 1}</div>
+          <strong>${escapeHtml(provider.title)}</strong>
+          <p>${escapeHtml(provider.body)}</p>
+          <button class="deck-button provider-choice ${active ? "active" : ""}" type="button" data-provider-choice="${providerIndex}">
+            ${active ? "Caminho selecionado" : "Usar este caminho"}
+          </button>
+          ${commandHtml({ label: provider.title, code: provider.code })}
+          ${extraCommands}
+          ${active ? `<div class="check-grid">${providerChecks}</div>` : `<div class="provider-hint">Escolha este caminho para mostrar e contar somente os checkpoints dele.</div>`}
+        </article>
+      `; }).join("")}</div>`;
+    }
+
+    function agentFallbackHtml(stage) {
+      const fallback = stage.agentFallback;
+      if (!fallback) return "";
+      const notes = (fallback.notes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const commands = (fallback.commands || []).map(commandHtml).join("");
+      return `
+        <section class="fallback-panel">
+          <div class="fallback-head">
+            <div class="kicker">${escapeHtml(fallback.kicker || "Sugestao")}</div>
+            <strong>${escapeHtml(fallback.title)}</strong>
+            <p>${escapeHtml(fallback.body)}</p>
+          </div>
+          ${notes ? `<div class="fallback-grid">${notes}</div>` : ""}
+          ${commands ? `<div class="fallback-grid">${commands}</div>` : ""}
+          ${fallback.table ? tableHtml(fallback.table) : ""}
+        </section>
+      `;
+    }
+
+    function renderStage() {
+      const stage = stages[currentIndex];
+      topTitle.textContent = stage.title;
+      topSummary.textContent = stage.summary;
+      asideTitle.textContent = `${stage.no} - ${stage.title}`;
+      asideSummary.textContent = stage.highlight;
+      localStorage.setItem(stageKey, stage.id);
+
+      const commands = (stage.commands || []).map(commandHtml).join("");
+      const leftNotes = (stage.leftNotes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const checks = (stage.checks || []).map((check, index) => checkHtml(checkId(stage, index), check)).join("");
+      const notes = (stage.notes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const checkCount = stageCheckIds(stage).length;
+      const doneCount = stageCheckIds(stage).filter((id) => saved[id]).length;
+      const referenceDone = !checkCount && Boolean(saved[stageCompleteId(stage)]);
+      const checkpointLabel = checkCount ? `${doneCount}/${checkCount}` : "Consulta";
+      const statusLabel = checkCount ? (doneCount === checkCount ? "Completo" : "Em andamento") : (referenceDone ? "Concluido" : "Consulta");
+      const titleClass = stage.id === "uso" ? "step-title" : (stage.title.length > 38 ? "long-title" : "");
+
+      stagePanel.innerHTML = `
+        <div class="stage-hero">
+          <div class="feature-card">
+            <div class="kicker">${escapeHtml(stage.kicker)}</div>
+            <h1 class="${titleClass}">${escapeHtml(stage.title)}</h1>
+            <p>${escapeHtml(stage.summary)}</p>
+          </div>
+          <div class="stage-meta">
+            <div class="mini-card"><div class="mini-label">Etapa</div><strong>${escapeHtml(stage.no)}</strong></div>
+            <div class="mini-card"><div class="mini-label">Checkpoints</div><strong>${checkpointLabel}</strong></div>
+            <div class="mini-card"><div class="mini-label">Foco</div><strong>${escapeHtml(stage.highlight)}</strong></div>
+            <div class="mini-card"><div class="mini-label">Status</div><strong>${statusLabel}</strong></div>
+          </div>
+        </div>
+        <div class="stage-content ${stage.providers ? "provider-stage-content" : ""}">
+          <div class="content-column">
+            ${stageGuideHtml(stage)}
+            ${linksHtml(stage)}
+            ${providersHtml(stage)}
+            ${commands}
+            ${leftNotes}
+            ${tablesHtml(stage)}
+          </div>
+          <div class="content-column">
+            ${checks ? `<div class="check-grid">${checks}</div>` : `<div class="note-card">Esta etapa e de consulta. Use os comandos quando precisar.</div>`}
+            ${notes}
+          </div>
+        </div>
+        ${agentFallbackHtml(stage)}
+        <div class="stage-footer">
+          <button class="deck-button" id="prevStage" type="button">Voltar</button>
+          <button class="deck-button primary" id="nextStage" type="button">Avancar</button>
+        </div>
+      `;
+
+      stagePanel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.addEventListener("change", () => {
+          saved[input.id] = input.checked;
+          localStorage.setItem(stateKey, JSON.stringify(saved));
+          render();
+        });
+      });
+
+      stagePanel.querySelectorAll("[data-provider-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          saved[providerChoiceId(stage)] = Number(button.dataset.providerChoice);
+          localStorage.setItem(stateKey, JSON.stringify(saved));
+          render();
+        });
+      });
+
+      stagePanel.querySelectorAll(".copy-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const codeNode = button.closest(".command-card").querySelector("code");
+          const result = await copyText(codeNode.innerText, codeNode);
+          button.textContent = result.copied ? "Copiado" : "Ctrl+C";
+          showToast(result.message);
+          setTimeout(() => (button.textContent = "Copiar"), result.copied ? 1400 : 2600);
+        });
+      });
+
+      document.getElementById("prevStage").addEventListener("click", () => moveStage(-1));
+      document.getElementById("nextStage").addEventListener("click", () => moveStage(1));
+    }
+
+    function renderAside() {
+      phaseGrid.innerHTML = stages.map((stage) => {
+        const ids = stageCheckIds(stage);
+        const done = stageIsDone(stage);
+        return `<div class="phase-cell ${done ? "done" : ""} ${ids.length ? "" : "reference"}">${stage.no}</div>`;
+      }).join("");
+
+      if (showingGlossary) {
+        asideTitle.textContent = "Glossario tecnico A-Z";
+        asideSummary.textContent = `${glossaryTerms.length} termos em linguagem direta.`;
+        contextList.innerHTML = [
+          `<div class="context-item"><strong>Como usar</strong><p>Clique em uma letra do indice e leia somente o termo que travou o passo.</p></div>`,
+          `<div class="context-item"><strong>Regra</strong><p>Cada explicacao tem uma frase para consulta rapida durante a instalacao.</p></div>`
+        ].join("");
+        return;
+      }
+
+      const stage = stages[currentIndex];
+      const commands = (stage.commands || []).slice(0, 4);
+      const phaseHelp = stage.phase === "SUBIR VPS"
+        ? "Voce esta preparando a VPS: alguns comandos rodam no PowerShell local e outros no SSH da VPS."
+        : stage.phase === "HARDENING"
+          ? "Voce esta alterando SSH/firewall: mantenha uma sessao aberta e teste antes de fechar portas."
+          : stage.phase === "LLM LOCAL"
+            ? "Voce esta instalando LLM local: rode comandos dentro da VPS como llmadmin."
+            : "Siga os blocos em ordem: VPS limpa, SSH, 1 comando, LLM local e validacao.";
+      contextList.innerHTML = [
+        `<div class="context-item"><strong>Bloco atual</strong><p>${escapeHtml(phaseHelp)}</p></div>`,
+        `<div class="context-item"><strong>Trocas antes de colar</strong><p>IP_DA_VPS = IP publico; EMAIL = seu email; CHAVE_PUBLICA_SSH = linha ssh-ed25519; llmadmin = usuario dedicado.</p></div>`,
+        `<div class="context-item"><strong>Regra de seguranca</strong><p>Nao abra 11434 publicamente; teste 2222 antes de fechar 22.</p></div>`,
+        ...commands.map((command) => `<div class="context-item"><strong>${escapeHtml(command.label)}</strong><p>${escapeHtml(commandText(command.code).split("\n")[0])}</p></div>`)
+      ].join("");
+    }
+
+    function renderProgress() {
+      const ids = allCheckIds();
+      const done = ids.filter((id) => saved[id]).length;
+      const total = ids.length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      progressValue.textContent = `${percent}%`;
+      progressSummary.textContent = `${done} de ${total}`;
+      progressOrb.style.background = `conic-gradient(var(--green) ${percent * 3.6}deg, var(--line) 0deg)`;
+    }
+
+    function render() {
+      renderRail();
+      if (showingGlossary) {
+        renderGlossaryStage();
+      } else {
+        renderStage();
+      }
+      renderAside();
+      renderProgress();
+    }
+
+    function moveStage(direction) {
+      const wasGlossary = showingGlossary;
+      if (!wasGlossary && direction > 0) {
+        markReferenceStageDone(stages[currentIndex]);
+      }
+      showingGlossary = false;
+      currentIndex = (currentIndex + direction + stages.length) % stages.length;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function showFloatingTip(trigger) {
+      const message = trigger?.dataset?.tip;
+      if (!message) return;
+      floatingTip.textContent = message;
+      floatingTip.setAttribute("aria-hidden", "false");
+      floatingTip.classList.add("show");
+
+      const rect = trigger.getBoundingClientRect();
+      const margin = 12;
+      const maxWidth = Math.min(320, window.innerWidth - margin * 2);
+      floatingTip.style.width = `${maxWidth}px`;
+      floatingTip.style.left = "0px";
+      floatingTip.style.top = "0px";
+
+      const tipRect = floatingTip.getBoundingClientRect();
+      const left = clamp(rect.left, margin, window.innerWidth - tipRect.width - margin);
+      let top = rect.bottom + 8;
+      if (top + tipRect.height > window.innerHeight - margin) {
+        top = rect.top - tipRect.height - 8;
+      }
+      floatingTip.style.left = `${left}px`;
+      floatingTip.style.top = `${Math.max(margin, top)}px`;
+    }
+
+    function hideFloatingTip() {
+      floatingTip.classList.remove("show");
+      floatingTip.setAttribute("aria-hidden", "true");
+    }
+
+    function selectElementText(element) {
+      if (!element) return;
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    async function copyText(text, sourceNode) {
+      let clipboardAttempted = false;
+      if (navigator.clipboard && window.isSecureContext) {
+        try {
+          await navigator.clipboard.writeText(text);
+          clipboardAttempted = true;
+        } catch {
+          // Alguns navegadores bloqueiam clipboard; use a selecao visivel abaixo.
+        }
+      }
+      selectElementText(sourceNode);
+      return {
+        copied: false,
+        message: clipboardAttempted
+          ? "Comando selecionado. Confira o clipboard ou aperte Ctrl+C."
+          : "Comando selecionado. Aperte Ctrl+C."
+      };
+    }
+
+    const themeIcons = {
+      sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+      moon: '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8Z"></path></svg>'
+    };
+
+    function setThemeButton(button, icon, label) {
+      button.innerHTML = `<span class="theme-icon" aria-hidden="true">${themeIcons[icon]}</span>`;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      const label = theme === "dark" ? "Alternar para tema claro" : "Alternar para tema escuro";
+      const icon = theme === "dark" ? "sun" : "moon";
+      setThemeButton(document.getElementById("themeToggle"), icon, label);
+      setThemeButton(document.getElementById("themeToggleTop"), icon, label);
+      localStorage.setItem(themeKey, theme);
+    }
+
+    function toggleTheme() {
+      applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+      showToast(document.documentElement.dataset.theme === "dark" ? "Tema escuro ativo" : "Tema claro ativo");
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    document.getElementById("themeToggleTop").addEventListener("click", toggleTheme);
+    document.getElementById("nextTop").addEventListener("click", () => moveStage(1));
+    document.getElementById("menuButton").addEventListener("click", () => document.body.classList.toggle("nav-open"));
+    document.getElementById("resetProgress").addEventListener("click", () => {
+      if (!confirm("Limpar todos os checkpoints marcados neste navegador?")) return;
+      Object.keys(saved).forEach((key) => delete saved[key]);
+      localStorage.setItem(stateKey, JSON.stringify(saved));
+      render();
+      showToast("Progresso limpo");
+    });
+    stageSearch.addEventListener("input", renderRail);
+    glossaryToggle.addEventListener("click", () => {
+      showingGlossary = !showingGlossary;
+      document.body.classList.remove("nav-open");
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast(showingGlossary ? "Glossario aberto" : "Voltou ao guia");
+    });
+
+    document.addEventListener("mouseover", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (!trigger) return;
+      showFloatingTip(trigger);
+    });
+
+    document.addEventListener("mouseout", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (!trigger) return;
+      if (event.relatedTarget && trigger.contains(event.relatedTarget)) return;
+      hideFloatingTip();
+    });
+
+    document.addEventListener("focusin", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (trigger) showFloatingTip(trigger);
+    });
+
+    document.addEventListener("focusout", (event) => {
+      if (event.target.closest("[data-tip]")) hideFloatingTip();
+    });
+
+    window.addEventListener("scroll", hideFloatingTip, true);
+    window.addEventListener("resize", hideFloatingTip);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.target.matches("input, textarea")) return;
+      hideFloatingTip();
+      if (event.key.toLowerCase() === "j") moveStage(1);
+      if (event.key.toLowerCase() === "k") moveStage(-1);
+    });
+
+    applyTheme(localStorage.getItem(themeKey) || "dark");
+    render();
+  </script>
+</body>
+</html>
