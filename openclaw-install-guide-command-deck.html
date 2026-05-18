@@ -1,0 +1,2711 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OpenClaw na VPS | Command Deck</title>
+  <style>
+    :root {
+      --bg: #090e17;
+      --panel: #0f1623;
+      --panel-2: #131d2d;
+      --panel-3: #182438;
+      --ink: #eef5ff;
+      --muted: #97a6ba;
+      --line: #263449;
+      --line-strong: #3d506d;
+      --blue: #74a9ff;
+      --green: #4ade80;
+      --amber: #f7c948;
+      --rose: #fb7185;
+      --cyan: #22d3ee;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+      --radius: 8px;
+      color-scheme: dark;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --panel-2: #f1f5fb;
+      --panel-3: #e9eef7;
+      --ink: #101828;
+      --muted: #5f6f84;
+      --line: #d8e1ee;
+      --line-strong: #bdc9da;
+      --blue: #2563eb;
+      --green: #15803d;
+      --amber: #a16207;
+      --rose: #be123c;
+      --cyan: #0891b2;
+      --shadow: 0 20px 48px rgba(16, 24, 40, 0.12);
+      color-scheme: light;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 0%, rgba(116, 169, 255, 0.14), transparent 36vw),
+        radial-gradient(circle at 88% 10%, rgba(74, 222, 128, 0.08), transparent 32vw),
+        radial-gradient(circle at 50% 100%, rgba(251, 113, 133, 0.06), transparent 38vw),
+        var(--bg);
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    a {
+      color: var(--blue);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .deck {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 330px;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .rail,
+    .stage,
+    .mission-aside,
+    .top-strip,
+    .mini-card,
+    .command-card,
+    .check-item,
+    .provider-card {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--panel) 94%, transparent);
+      backdrop-filter: blur(20px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .rail {
+      position: sticky;
+      top: 16px;
+      height: calc(100vh - 32px);
+      display: grid;
+      grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+      gap: 14px;
+      padding: 16px;
+      overflow: hidden;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      border-radius: var(--radius);
+    }
+
+    .brand:hover {
+      text-decoration: none;
+    }
+
+    .brand:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 4px;
+    }
+
+    .brand-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .brand-mark img,
+    .brand-mark svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+
+    .brand strong,
+    .stage-title strong {
+      display: block;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+    }
+
+    .brand span,
+    .stage-title span {
+      color: var(--muted);
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .progress-orb {
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+    }
+
+    .orb {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: conic-gradient(var(--green) 0deg, var(--line) 0deg);
+      position: relative;
+    }
+
+    .orb::after {
+      content: "";
+      position: absolute;
+      inset: 8px;
+      border-radius: inherit;
+      background: var(--panel);
+    }
+
+    .orb span {
+      position: relative;
+      z-index: 1;
+      font-weight: 850;
+      font-size: 18px;
+    }
+
+    .progress-copy p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      line-height: 1.35;
+      font-size: 12px;
+    }
+
+    .rail-tools {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rail-box {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .rail-box-label {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .rail-search {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 12px;
+      background: var(--panel);
+      color: var(--ink);
+      outline: none;
+    }
+
+    .rail-search:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 18%, transparent);
+    }
+
+    .glossary-toggle {
+      width: 100%;
+      justify-content: space-between;
+      padding: 0 12px;
+    }
+
+    .glossary-toggle.active {
+      border-color: var(--blue);
+      background: color-mix(in srgb, var(--blue) 16%, var(--panel-2));
+    }
+
+    .glossary-toggle span {
+      opacity: 0.8;
+    }
+
+    .glossary-stage {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .glossary-hero {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, transparent), transparent 48%),
+        var(--panel-2);
+      padding: 18px;
+    }
+
+    .glossary-hero h1 {
+      font-size: clamp(34px, 5vw, 56px);
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .letter-index {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(36px, 1fr));
+      gap: 6px;
+    }
+
+    .letter-link {
+      min-height: 34px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 850;
+      text-decoration: none;
+    }
+
+    .letter-link.disabled {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .glossary-sections {
+      display: grid;
+      gap: 14px;
+    }
+
+    .glossary-section {
+      display: grid;
+      gap: 10px;
+    }
+
+    .letter-heading {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .glossary-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-2);
+      padding: 12px;
+      display: grid;
+      gap: 6px;
+    }
+
+    .glossary-card strong {
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .glossary-card p {
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .stage-list {
+      display: grid;
+      gap: 8px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .stage-button {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--muted);
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr) 22px;
+      align-items: center;
+      gap: 10px;
+      padding: 9px;
+      text-align: left;
+    }
+
+    .stage-button:hover {
+      background: var(--panel-2);
+      color: var(--ink);
+    }
+
+    .stage-button.active {
+      border-color: var(--line-strong);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--blue) 9%, var(--panel)), var(--panel-2));
+      color: var(--ink);
+    }
+
+    .stage-button.done .stage-no {
+      background: color-mix(in srgb, var(--green) 18%, var(--panel));
+      color: var(--green);
+    }
+
+    .stage-no {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--panel-3);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 820;
+    }
+
+    .stage-button strong {
+      font-size: 13px;
+      line-height: 1.2;
+      display: block;
+    }
+
+    .stage-button small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stage-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid var(--line-strong);
+      justify-self: center;
+    }
+
+    .stage-button.done .stage-dot {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .rail-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .deck-button,
+    .copy-button,
+    .mode-button {
+      min-height: 40px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      color: var(--ink);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 720;
+      transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+    }
+
+    .deck-button:hover,
+    .copy-button:hover,
+    .mode-button:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: var(--panel-3);
+    }
+
+    .theme-icon-button {
+      width: 44px;
+      min-width: 44px;
+      padding: 0;
+    }
+
+    .theme-icon {
+      width: 18px;
+      height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .theme-icon svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .deck-button.primary {
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      color: #06111f;
+      border-color: transparent;
+    }
+
+    .workbench {
+      min-width: 0;
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .top-strip {
+      min-height: 84px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      box-shadow: none;
+    }
+
+    .stage-title {
+      min-width: 0;
+    }
+
+    .stage-title strong {
+      font-size: clamp(20px, 3vw, 32px);
+    }
+
+    .stage-title span {
+      line-height: 1.45;
+      max-width: 760px;
+    }
+
+    .stage {
+      padding: 18px;
+      min-height: 620px;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 16px;
+      overflow: hidden;
+    }
+
+    .stage-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+      gap: 14px;
+    }
+
+    .feature-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, color-mix(in srgb, var(--blue) 12%, transparent), transparent 48%),
+        var(--panel-2);
+      padding: 18px;
+      min-height: 180px;
+      display: grid;
+      align-content: end;
+    }
+
+    .feature-card .kicker,
+    .mini-label,
+    .card-kicker {
+      color: var(--blue);
+      font-size: 11px;
+      font-weight: 850;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(34px, 5.4vw, 64px);
+      line-height: 1;
+      max-width: 900px;
+    }
+
+    .feature-card h1 {
+      max-width: 100%;
+      overflow-wrap: break-word;
+      text-wrap: balance;
+    }
+
+    .feature-card h1.long-title {
+      font-size: 50px;
+      line-height: 1.03;
+    }
+
+    .feature-card h1.step-title {
+      font-size: clamp(34px, 4vw, 50px);
+      line-height: 1.04;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    h2 {
+      font-size: clamp(24px, 4vw, 42px);
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: var(--muted);
+      line-height: 1.58;
+    }
+
+    .stage-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .mini-card {
+      box-shadow: none;
+      padding: 14px;
+      background: var(--panel-2);
+    }
+
+    .mini-card strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 20px;
+    }
+
+    .stage-content {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .stage-content.provider-stage-content {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stage-content.provider-stage-content > .content-column:nth-child(2) {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .content-column {
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      min-width: 0;
+    }
+
+    .command-card {
+      box-shadow: none;
+      overflow: visible;
+      background: #050914;
+      position: relative;
+    }
+
+    :root[data-theme="light"] .command-card {
+      background: #111827;
+    }
+
+    .command-head {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px 0 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #dce7f7;
+      font-size: 12px;
+    }
+
+    .command-title {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-weight: 850;
+    }
+
+    .command-title > span:first-child {
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .command-help {
+      position: relative;
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      color: #93c5fd;
+      background: rgba(147, 197, 253, 0.08);
+      cursor: help;
+    }
+
+    .command-help svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+    }
+
+    .command-help::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: auto;
+      right: 0;
+      top: calc(100% + 9px);
+      z-index: 40;
+      width: min(310px, 72vw);
+      padding: 10px 11px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 8px;
+      background: #e9f0fb;
+      color: #06111f;
+      font-size: 12px;
+      line-height: 1.38;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 700;
+      white-space: normal;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+    }
+
+    .command-help:hover::after,
+    .command-help:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .command-help::after,
+    .cell-help::after {
+      display: none;
+    }
+
+    .copy-button {
+      min-height: 30px;
+      padding: 0 10px;
+      color: white;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.18);
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 15px;
+      color: #e9f0fb;
+      overflow-x: auto;
+      line-height: 1.55;
+      font-size: 13px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 0.95em;
+    }
+
+    .inline-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      border: 1px solid var(--line);
+      background: var(--panel-2);
+      color: var(--ink);
+      border-radius: 6px;
+      padding: 1px 5px;
+      font-size: 0.92em;
+    }
+
+    .check-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .check-item {
+      box-shadow: none;
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      padding: 11px 12px;
+      background: var(--panel-2);
+    }
+
+    .check-item input {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--line-strong);
+      border-radius: 6px;
+      margin: 0;
+      background: var(--panel);
+      display: grid;
+      place-items: center;
+    }
+
+    .check-item input:checked {
+      background: var(--green);
+      border-color: var(--green);
+    }
+
+    .check-item input:checked::after {
+      content: "";
+      width: 9px;
+      height: 5px;
+      border-left: 2px solid #06111f;
+      border-bottom: 2px solid #06111f;
+      transform: rotate(-45deg);
+      margin-top: -2px;
+    }
+
+    .check-item label {
+      line-height: 1.42;
+      cursor: pointer;
+    }
+
+    .check-item:has(input:checked) {
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+      background: color-mix(in srgb, var(--green) 10%, var(--panel));
+    }
+
+    .note-card {
+      border: 1px solid var(--line);
+      border-left: 3px solid var(--amber);
+      border-radius: var(--radius);
+      padding: 13px 14px;
+      background: color-mix(in srgb, var(--amber) 8%, var(--panel));
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .fallback-panel {
+      border: 1px solid color-mix(in srgb, var(--blue) 34%, var(--line));
+      border-radius: var(--radius);
+      padding: 16px;
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--blue) 7%, transparent), transparent 70%),
+        var(--panel);
+      display: grid;
+      gap: 14px;
+    }
+
+    .fallback-head {
+      display: grid;
+      gap: 6px;
+      max-width: 760px;
+    }
+
+    .fallback-head strong {
+      font-size: clamp(20px, 1.8vw, 30px);
+      line-height: 1.08;
+    }
+
+    .fallback-head p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.48;
+    }
+
+    .fallback-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .fallback-grid .command-card:first-child,
+    .fallback-grid .command-card:last-child {
+      grid-column: 1 / -1;
+    }
+
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .provider-card {
+      box-shadow: none;
+      padding: 14px;
+      background: var(--panel-2);
+      display: grid;
+      gap: 10px;
+      align-content: start;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .provider-card.active {
+      border-color: color-mix(in srgb, var(--blue) 50%, var(--line));
+      background:
+        linear-gradient(180deg, color-mix(in srgb, var(--blue) 8%, transparent), transparent 52%),
+        var(--panel-2);
+    }
+
+    .provider-choice {
+      min-height: 32px;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .provider-choice.active {
+      color: #06111f;
+      border-color: transparent;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+    }
+
+    .provider-hint {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+      background: color-mix(in srgb, var(--panel) 70%, transparent);
+    }
+
+    .provider-card strong {
+      font-size: 15px;
+    }
+
+    .provider-card p {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .link-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 14px;
+      display: grid;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .link-card:hover {
+      border-color: var(--line-strong);
+      background: var(--panel-3);
+      text-decoration: none;
+    }
+
+    .link-card strong {
+      font-size: 15px;
+    }
+
+    .link-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .link-card .link-body {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .link-card .link-cta {
+      color: #06111f;
+      background: linear-gradient(135deg, var(--blue), var(--green));
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .simple-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      overflow: visible;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      font-size: clamp(14px, 0.82vw, 15.5px);
+    }
+
+    .simple-table th,
+    .simple-table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .simple-table th {
+      color: var(--blue);
+      background: var(--panel-2);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: clamp(11px, 0.68vw, 12px);
+    }
+
+    .simple-table tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .table-cell {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      max-width: 100%;
+    }
+
+    .table-cell code {
+      font-size: 1em;
+      min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .table-link {
+      color: var(--blue);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 850;
+    }
+
+    .table-link:hover {
+      color: var(--green);
+    }
+
+    .cell-help {
+      position: relative;
+      flex: 0 0 auto;
+      width: 17px;
+      height: 17px;
+      border: 1px solid var(--line-strong);
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      color: var(--blue);
+      background: var(--panel-2);
+      cursor: help;
+      transform: translateY(1px);
+    }
+
+    .cell-help svg {
+      width: 11px;
+      height: 11px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.4;
+    }
+
+    .cell-help::after {
+      content: attr(data-tip);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 9px);
+      z-index: 20;
+      width: min(270px, 72vw);
+      padding: 9px 10px;
+      border: 1px solid var(--line-strong);
+      border-radius: 8px;
+      background: var(--ink);
+      color: var(--bg);
+      font-size: 12px;
+      line-height: 1.35;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-weight: 650;
+      text-transform: none;
+      letter-spacing: 0;
+      white-space: normal;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .cell-help.tip-left::after {
+      left: auto;
+      right: 0;
+    }
+
+    .cell-help:hover::after,
+    .cell-help:focus-visible::after {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .mission-aside {
+      position: sticky;
+      top: 16px;
+      height: calc(100vh - 32px);
+      padding: 16px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr);
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .aside-block {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel-2);
+      padding: 14px;
+    }
+
+    .mission-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .mission-reset {
+      width: 28px;
+      min-width: 28px;
+      min-height: 28px;
+      padding: 0;
+      border-radius: 7px;
+      opacity: 0.52;
+      background: transparent;
+    }
+
+    .mission-reset:hover,
+    .mission-reset:focus-visible {
+      opacity: 1;
+      background: var(--panel);
+    }
+
+    .mission-reset svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      stroke-width: 2.2;
+    }
+
+    .aside-block h3 {
+      margin-bottom: 8px;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .phase-cell {
+      min-height: 44px;
+      border-radius: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .phase-cell.done {
+      background: color-mix(in srgb, var(--green) 16%, var(--panel));
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+    }
+
+    .phase-cell.reference {
+      color: var(--blue);
+      background: color-mix(in srgb, var(--blue) 8%, var(--panel));
+    }
+
+    .phase-cell.reference.done {
+      background: color-mix(in srgb, var(--green) 16%, var(--panel));
+      color: var(--green);
+      border-color: color-mix(in srgb, var(--green) 50%, var(--line));
+    }
+
+    .context-list {
+      display: grid;
+      gap: 10px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .context-item {
+      padding: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .context-item strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .context-item p {
+      margin: 0;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      min-height: 44px;
+      padding: 0 16px;
+      border-radius: var(--radius);
+      background: var(--ink);
+      color: var(--bg);
+      display: grid;
+      place-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(14px);
+      transition: opacity 160ms ease, transform 160ms ease;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .floating-tip {
+      position: fixed;
+      z-index: 200;
+      max-width: min(320px, calc(100vw - 24px));
+      padding: 10px 11px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      border-radius: 8px;
+      background: #e9f0fb;
+      color: #06111f;
+      font-size: 12px;
+      line-height: 1.38;
+      font-weight: 720;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-3px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .floating-tip.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mobile-toggle {
+      display: none;
+    }
+
+    @media (max-width: 1700px) {
+      .deck {
+        grid-template-columns: 280px minmax(0, 1fr);
+      }
+
+      .mission-aside {
+        display: none;
+      }
+    }
+
+    @media (max-width: 1180px) {
+      .deck {
+        grid-template-columns: 260px minmax(0, 1fr);
+      }
+
+      .feature-card h1.long-title {
+        font-size: 46px;
+      }
+
+      .feature-card h1.step-title {
+        font-size: 44px;
+      }
+
+    }
+
+    @media (max-width: 880px) {
+      .deck {
+        grid-template-columns: 1fr;
+        padding: 12px;
+      }
+
+      .rail {
+        position: fixed;
+        z-index: 9;
+        inset: 12px auto 12px 12px;
+        width: min(88vw, 330px);
+        height: auto;
+        transform: translateX(calc(-100% - 18px));
+        transition: transform 180ms ease;
+      }
+
+      body.nav-open .rail {
+        transform: translateX(0);
+      }
+
+      .mobile-toggle {
+        display: inline-flex;
+      }
+
+      .top-strip {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+      }
+
+      .top-strip .mode-button {
+        display: none;
+      }
+
+      .stage,
+      .stage-content,
+      .stage-hero,
+      .provider-grid,
+      .fallback-grid,
+      .glossary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stage {
+        min-height: auto;
+      }
+
+      .stage-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card h1.long-title {
+        font-size: 44px;
+      }
+
+      .feature-card h1.step-title {
+        font-size: clamp(34px, 7vw, 44px);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .simple-table,
+      .simple-table thead,
+      .simple-table tbody,
+      .simple-table tr,
+      .simple-table td {
+        display: block;
+      }
+
+      .simple-table {
+        border: 0;
+        background: transparent;
+      }
+
+      .simple-table thead {
+        display: none;
+      }
+
+      .simple-table tbody {
+        display: grid;
+        gap: 10px;
+      }
+
+      .simple-table tr {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-2);
+        padding: 10px 12px;
+      }
+
+      .simple-table td {
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .simple-table td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 4px;
+        color: var(--blue);
+        font-size: 10px;
+        font-weight: 850;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .top-strip {
+        grid-template-columns: auto minmax(0, 1fr);
+      }
+
+      .top-strip .deck-button.primary {
+        grid-column: 1 / -1;
+      }
+
+      .stage-footer {
+        flex-direction: column;
+      }
+
+      .stage-footer .deck-button {
+        width: 100%;
+      }
+
+      .feature-card h1.long-title {
+        font-size: 32px;
+        line-height: 1.05;
+      }
+
+      .feature-card h1.step-title {
+        font-size: clamp(30px, 8vw, 38px);
+        white-space: normal;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <aside class="rail" aria-label="Etapas">
+      <a class="brand" href="https://x.com/openclaw" target="_blank" rel="noopener noreferrer" aria-label="Abrir perfil oficial do OpenClaw no X" title="Abrir perfil oficial do OpenClaw no X">
+        <div class="brand-mark" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 16 16" role="img" aria-label="Pixel lobster">
+            <rect width="16" height="16" fill="none"/>
+            <g fill="#3a0a0d">
+              <rect x="1" y="5" width="1" height="3"/>
+              <rect x="2" y="4" width="1" height="1"/>
+              <rect x="2" y="8" width="1" height="1"/>
+              <rect x="3" y="3" width="1" height="1"/>
+              <rect x="3" y="9" width="1" height="1"/>
+              <rect x="4" y="2" width="1" height="1"/>
+              <rect x="4" y="10" width="1" height="1"/>
+              <rect x="5" y="2" width="6" height="1"/>
+              <rect x="11" y="2" width="1" height="1"/>
+              <rect x="12" y="3" width="1" height="1"/>
+              <rect x="12" y="9" width="1" height="1"/>
+              <rect x="13" y="4" width="1" height="1"/>
+              <rect x="13" y="8" width="1" height="1"/>
+              <rect x="14" y="5" width="1" height="3"/>
+              <rect x="5" y="11" width="6" height="1"/>
+              <rect x="4" y="12" width="1" height="1"/>
+              <rect x="11" y="12" width="1" height="1"/>
+              <rect x="3" y="13" width="1" height="1"/>
+              <rect x="12" y="13" width="1" height="1"/>
+              <rect x="5" y="14" width="6" height="1"/>
+            </g>
+            <g fill="#ff4f40">
+              <rect x="5" y="3" width="6" height="1"/>
+              <rect x="4" y="4" width="8" height="1"/>
+              <rect x="3" y="5" width="10" height="1"/>
+              <rect x="3" y="6" width="10" height="1"/>
+              <rect x="3" y="7" width="10" height="1"/>
+              <rect x="4" y="8" width="8" height="1"/>
+              <rect x="5" y="9" width="6" height="1"/>
+              <rect x="5" y="12" width="6" height="1"/>
+              <rect x="6" y="13" width="4" height="1"/>
+            </g>
+            <g fill="#ff775f">
+              <rect x="1" y="6" width="2" height="1"/>
+              <rect x="2" y="5" width="1" height="1"/>
+              <rect x="2" y="7" width="1" height="1"/>
+              <rect x="13" y="6" width="2" height="1"/>
+              <rect x="13" y="5" width="1" height="1"/>
+              <rect x="13" y="7" width="1" height="1"/>
+            </g>
+            <g fill="#081016">
+              <rect x="6" y="5" width="1" height="1"/>
+              <rect x="9" y="5" width="1" height="1"/>
+            </g>
+            <g fill="#f5fbff">
+              <rect x="6" y="4" width="1" height="1"/>
+              <rect x="9" y="4" width="1" height="1"/>
+            </g>
+          </svg>
+        </div>
+        <div>
+          <strong>OpenClaw</strong>
+          <span>Infraestrutura em Nuvem 100% controlada</span>
+        </div>
+      </a>
+
+      <div class="progress-orb">
+        <div class="orb" id="progressOrb"><span id="progressValue">0%</span></div>
+        <div class="progress-copy">
+          <strong id="progressSummary">0 de 0</strong>
+          <p>Checkpoints Concluidos</p>
+        </div>
+      </div>
+
+      <div class="rail-tools">
+        <section class="rail-box" aria-label="Buscar etapas">
+          <div class="rail-box-label">Buscar</div>
+          <input class="rail-search" id="stageSearch" type="search" placeholder="Buscar" aria-label="Buscar" />
+        </section>
+        <section class="rail-box" aria-label="Glossario tecnico">
+          <button class="deck-button glossary-toggle" id="glossaryToggle" type="button" aria-pressed="false">
+            Glossario A-Z <span aria-hidden="true">Abrir</span>
+          </button>
+        </section>
+      </div>
+      <nav class="stage-list" id="stageList" aria-label="Lista de etapas"></nav>
+
+      <div class="rail-actions">
+        <button class="deck-button" id="themeToggle" type="button" aria-label="Alternar para tema claro" title="Alternar para tema claro">
+          <span class="theme-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="workbench">
+      <header class="top-strip">
+        <button class="deck-button mobile-toggle" id="menuButton" type="button">Menu</button>
+        <div class="stage-title">
+          <strong id="topTitle">OpenClaw na VPS</strong>
+          <span id="topSummary">Instalacao guiada com progresso e comandos copiaveis.</span>
+        </div>
+        <button class="mode-button theme-icon-button" id="themeToggleTop" type="button" aria-label="Alternar para tema claro" title="Alternar para tema claro">
+          <span class="theme-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+          </span>
+        </button>
+        <button class="deck-button primary" id="nextTop" type="button">Avancar</button>
+      </header>
+
+      <section class="stage" id="stagePanel" aria-live="polite"></section>
+    </main>
+
+    <aside class="mission-aside" aria-label="Painel de contexto">
+      <div class="aside-block">
+        <div class="mission-head">
+          <div class="mini-label">Mapa da missao</div>
+          <button class="deck-button mission-reset" id="resetProgress" type="button" aria-label="Limpar progresso salvo" title="Limpar progresso salvo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 4v5h5"></path></svg>
+          </button>
+        </div>
+        <div class="phase-grid" id="phaseGrid" style="margin-top:12px;"></div>
+      </div>
+      <div class="aside-block">
+        <div class="mini-label">Estado atual</div>
+        <h3 id="asideTitle" style="margin-top:8px;">Inicio</h3>
+        <p id="asideSummary">Selecione uma etapa para ver comandos e checklist.</p>
+      </div>
+      <div class="context-list" id="contextList"></div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copiado</div>
+  <div class="floating-tip" id="floatingTip" role="tooltip" aria-hidden="true"></div>
+
+  <script>
+    const stages = [
+      {
+        id: "uso",
+        no: "00",
+        title: "GUIA PASSO-A-PASSO",
+        kicker: "Orientacao",
+        summary: "Guia Rapido para Ter seu Agente OpenClaw Seguro na Nuvem!",
+        highlight: "Ordem: Hostinger -> SSH 2222 -> OpenClaw -> IA -> validar -> fechar porta 22.",
+        checks: [
+          "Ler um passo por vez.",
+          "Copiar apenas os comandos do passo atual.",
+          "Trocar IP_DA_VPS, PORTA, EMAIL e PROVIDER/MODELO pelos seus dados.",
+          "Marcar cada checkpoint quando concluir."
+        ],
+        table: {
+          head: ["Ambiente", "Onde executar", "Quando usar"],
+          rows: [
+            [
+              { text: "Computador local", tip: "E o seu notebook ou PC, antes de entrar na VPS." },
+              { text: "PowerShell, Terminal ou app de comandos", tip: "Use aqui para abrir o terminal local, criar chave SSH ou testar conexao com ssh -p 2222." },
+              { text: "So use quando o guia disser claramente: abrir PowerShell, criar chave SSH ou testar conexao.", tip: "Nao cole comandos de instalacao Linux aqui." }
+            ],
+            [
+              { text: "VPS como root", tip: "Root e o administrador inicial da VPS." },
+              { text: "ssh root@IP_DA_VPS", tip: "Depois de conectar por SSH, os comandos rodam dentro da VPS." },
+              { text: "Use para preparar servidor, baixar setup e alterar SSH/firewall.", tip: "E o ambiente certo para instalacao base e seguranca." }
+            ],
+            [
+              { text: "Usuario openclaw", tip: "Usuario separado criado para rodar o agente com menos risco." },
+              { text: "sudo -iu openclaw", tip: "Troca do root para o usuario openclaw carregando o ambiente dele." },
+              { text: "Use quando o comando precisar rodar no ambiente do OpenClaw.", tip: "Normalmente vale para openclaw doctor, gateway e models." }
+            ]
+          ]
+        },
+        notes: [
+          "Use esta tabela antes de copiar qualquer comando: ela mostra se o comando deve ser colado no seu computador, na VPS como root ou no usuario openclaw.",
+          "Caminho recomendado: contratar VPS, abrir PowerShell, chave SSH, root, setup, teste 2222, Assinatura/Codex, validacao, fechar porta 22.",
+          "Se apareceu erro, pare no passo atual. Nao avance tentando compensar depois."
+        ]
+      },
+      {
+        id: "requisitos",
+        no: "01",
+        title: "Antes de comecar",
+        kicker: "Preparacao",
+        summary: "Contrate a VPS, confirme recursos, acesso root e caminho de IA.",
+        highlight: "Hostinger VPS, Ubuntu 24.04, root, IP e provider escolhido.",
+        links: [
+          {
+            label: "Contratar VPS da Hostinger",
+            url: "https://www.hostinger.com/br/cart?product=vps%3Avps_kvm_2&period=12&referral_type=cart_link&REFERRALCODE=PHOMANAGEDXK&referral_id=019df428-8df2-701e-9f37-9aba5172433a",
+            body: "Abra o link, escolha Servidor VPS e confira plano, renovacao e recursos antes de pagar."
+          }
+        ],
+        checks: [
+          "Abri o link da Hostinger e entrei na area de Servidor VPS.",
+          "Comparei RAM, vCPU, disco NVMe, largura de banda e valor de renovacao antes de pagar.",
+          "Escolhi uma VPS KVM com pelo menos 4 GB de RAM.",
+          "Se quero mais folga para modelos e automacoes, escolhi KVM 4 ou superior.",
+          "Escolhi uma regiao de servidor adequada ao meu uso.",
+          "Na criacao da VPS, selecionei Ubuntu 24.04 LTS quando essa opcao apareceu.",
+          "Guardei o IP publico da VPS.",
+          "Confirmei que tenho acesso root ou dados de acesso inicial no painel.",
+          "A VPS aparece como ativa no painel da Hostinger.",
+          "Conta ou chave de API de algum provider de IA."
+        ],
+        table: {
+          head: ["Etapa", "O que fazer", "Atenção"],
+          rows: [
+            [{ text: "Abrir link", url: "https://www.hostinger.com/br/cart?product=vps%3Avps_kvm_2&period=12&referral_type=cart_link&REFERRALCODE=PHOMANAGEDXK&referral_id=019df428-8df2-701e-9f37-9aba5172433a" }, "Use o botao de contratacao da Hostinger.", "Confira se esta em Servidor VPS, nao hospedagem comum."],
+            ["Escolher plano", "Compare RAM, vCPU, disco NVMe e banda.", "Nao decida apenas pelo preco promocional."],
+            ["Periodo e renovacao", "Veja valor inicial, periodo contratado e renovacao.", "O valor de renovacao pode ser diferente da oferta inicial."],
+            ["Sistema", "Escolha Ubuntu 24.04 LTS se estiver disponivel.", "Se vier outro sistema, reinstale pelo painel antes da aula."],
+            ["Acesso", "Guarde IP, usuario root e senha temporaria.", "Esses dados serao usados no proximo passo."],
+            ["Painel", "Espere a VPS ficar ativa no painel.", "Nao rode comandos enquanto a criacao ainda estiver pendente."]
+          ]
+        },
+        tables: [
+          {
+            head: ["Se voce tem", "Caminho", "Exemplo"],
+            rows: [
+              ["Assinatura ChatGPT/Codex", "Login por conta/OAuth", "openai-codex/gpt-5.4"],
+              ["OpenAI API key", "OpenAI Platform", "openai/gpt-5.4"],
+              ["Outro provider", "Assistente para escolher provider", "provider/modelo"],
+              ["Endpoint proprio/proxy", "Assistente customizado", "custom/modelo"]
+            ]
+          }
+        ],
+        notes: [
+          "A contratacao envolve pagamento: confira preco final, periodo, renovacao e politica de reembolso antes de confirmar.",
+          "Nao cole API keys em documentos ou prints. Cole chaves apenas no terminal quando o OpenClaw pedir."
+        ]
+      },
+      {
+        id: "powershell",
+        no: "02",
+        title: "Abrir PowerShell",
+        kicker: "Computador local",
+        summary: "Abra a janela de comandos do seu computador antes de criar a chave SSH.",
+        highlight: "No Windows, use PowerShell; no macOS ou Linux, use Terminal.",
+        table: {
+          head: ["Sistema", "Como abrir", "Quando usar"],
+          rows: [
+            [
+              { text: "Windows", tip: "PowerShell e a janela do Windows onde voce digita comandos e ve respostas." },
+              { text: "Menu Iniciar > digite PowerShell > Enter", tip: "Tambem funciona abrir Terminal pelo menu Iniciar, se ele aparecer no seu Windows." },
+              { text: "Use para criar a chave SSH e testar ssh -p 2222.", tip: "Esses comandos rodam no seu computador, nao dentro da VPS." }
+            ],
+            [
+              { text: "macOS", tip: "Terminal e o app do macOS para digitar comandos." },
+              { text: "Cmd + Espaco > digite Terminal > Enter", tip: "Tambem fica em Aplicativos > Utilitarios > Terminal." },
+              { text: "Use para criar a chave SSH e testar conexao.", tip: "No macOS, o comando para ver a chave usa cat." }
+            ],
+            [
+              { text: "Linux", tip: "Terminal e a janela de comandos do seu ambiente Linux." },
+              { text: "Ctrl + Alt + T", tip: "Se nao abrir, procure Terminal no menu de aplicativos." },
+              { text: "Use para criar a chave SSH e testar conexao.", tip: "Faca isso no computador local antes de entrar na VPS." }
+            ]
+          ]
+        },
+        checks: [
+          "Abri o PowerShell no Windows ou Terminal no macOS/Linux.",
+          "Entendi que esta etapa roda no computador local, nao na VPS.",
+          "Estou pronto para colar o comando da chave SSH no proximo passo."
+        ],
+        notes: [
+          "PowerShell e o terminal do Windows: uma janela para digitar comandos e ver as respostas do sistema.",
+          "Se voce ja estiver dentro da VPS, abra uma nova janela no seu computador antes da proxima etapa."
+        ]
+      },
+      {
+        id: "chave",
+        no: "03",
+        title: "Criar chave SSH",
+        kicker: "Computador local",
+        summary: "Este passo roda no computador do aluno, nao na VPS.",
+        highlight: "Gerar chave, copiar linha ssh-ed25519.",
+        commands: [
+          { label: "Windows PowerShell", code: 'ssh-keygen -t ed25519 -C "EMAIL"\\ntype $env:USERPROFILE\\\\.ssh\\\\id_ed25519.pub' },
+          { label: "macOS ou Linux", code: 'ssh-keygen -t ed25519 -C "EMAIL"\\ncat ~/.ssh/id_ed25519.pub' }
+        ],
+        checks: [
+          "Copiei a linha que comeca com ssh-ed25519.",
+          "Guardei essa chave publica para colar no setup da VPS."
+        ]
+      },
+      {
+        id: "root",
+        no: "04",
+        title: "Entrar como root",
+        kicker: "Acesso inicial",
+        summary: "Entre na VPS e confirme versao do sistema, memoria e disco.",
+        highlight: "Entrar na VPS como root.",
+        commands: [
+          { label: "Acesso padrao", code: "ssh root@IP_DA_VPS" },
+          { label: "Porta customizada", code: "ssh -p PORTA root@IP_DA_VPS" }
+        ],
+        checks: [
+          "Estou dentro da VPS como root.",
+          "Substitui IP_DA_VPS pelo IP real.",
+          "Se usei porta customizada, substitui PORTA pela porta correta."
+        ]
+      },
+      {
+        id: "setup",
+        no: "05",
+        title: "Rodar Bare Metal",
+        kicker: "Setup",
+        summary: "Prepara seguranca, usuario dedicado, dependencias e base do OpenClaw.",
+        highlight: "Baixar e executar o setup.",
+        commands: [
+          { label: "Baixar e executar", code: "curl -fsSL https://gist.githubusercontent.com/mrdornellesf/7c5730e765dd080780c550e439f64a84/raw/baremetal-setup.sh -o /tmp/setup.sh && chmod +x /tmp/setup.sh && /tmp/setup.sh" }
+        ],
+        leftNotes: [
+          "No macOS nao muda: este comando roda dentro da VPS Linux. No Mac, use o Terminal apenas para entrar na VPS por SSH."
+        ],
+        checks: [
+          "Respondi s quando o script perguntou se queria continuar.",
+          "Colei minha chave publica ssh-ed25519 quando solicitado.",
+          "Aguardei a criacao do usuario openclaw.",
+          "Nao fechei o terminal principal da VPS."
+        ]
+      },
+      {
+        id: "porta2222",
+        no: "06",
+        title: "Testar SSH 2222",
+        kicker: "Acesso seguro",
+        summary: "Abra outro terminal no computador local e teste a nova porta.",
+        highlight: "Confirmar porta 2222 antes de fechar porta 22.",
+        commands: [
+          { label: "No computador local", code: "ssh -p 2222 openclaw@IP_DA_VPS" }
+        ],
+        checks: [
+          "Consegui entrar com ssh -p 2222 openclaw@IP_DA_VPS.",
+          "Voltei ao terminal principal do setup.",
+          "Respondi s confirmando que o SSH funcionou."
+        ],
+        notes: ["Se nao conectou, nao feche a porta 22 ainda. Corrija o acesso primeiro."]
+      },
+      {
+        id: "provider",
+        no: "07",
+        title: "Configurar provider",
+        kicker: "IA",
+        summary: "Escolha assinatura/Codex, OpenAI API key ou outro provider pelo assistente.",
+        highlight: "Se estiver em duvida, use assinatura ChatGPT/Codex.",
+        providers: [
+          {
+            title: "Assinatura ChatGPT/Codex",
+            body: "Login por conta, sem OPENAI_API_KEY.",
+            code: "sudo -iu openclaw bash -lc 'openclaw models auth login --provider openai-codex'\\nsudo -iu openclaw bash -lc 'openclaw models set openai-codex/gpt-5.4'",
+            extraCommands: [
+              { label: "Device code, se disponivel", code: "sudo -iu openclaw bash -lc 'openclaw models auth login --provider openai-codex --device-code'\\nsudo -iu openclaw bash -lc 'openclaw models set openai-codex/gpt-5.4'" }
+            ],
+            checks: [
+              "Copiei a URL exibida no terminal.",
+              "Abri a URL no navegador do meu computador.",
+              "Fiz login na conta.",
+              "Autorizei o acesso.",
+              "Colei no terminal o codigo ou retorno solicitado."
+            ]
+          },
+          {
+            title: "OpenAI API key",
+            body: "Chave da OpenAI Platform no assistente.",
+            code: "sudo -iu openclaw bash -lc 'openclaw onboard --auth-choice openai-api-key --install-daemon'",
+            checks: [
+              "Colei a API key somente no terminal.",
+              "Escolhi o modelo no formato openai/modelo.",
+              "Instalei o daemon/gateway quando perguntado."
+            ]
+          },
+          {
+            title: "Outro provider",
+            body: "Use o assistente para escolher Anthropic, OpenRouter, Z.AI, xAI, Google, Mistral, proxy ou endpoint custom.",
+            code: "sudo -iu openclaw bash -lc 'openclaw onboard --install-daemon'",
+            checks: [
+              "Escolhi o provider correto.",
+              "Autentiquei com OAuth, API key ou endpoint customizado.",
+              "Configurei o modelo no formato provider/modelo.",
+              "Instalei o daemon/gateway."
+            ]
+          }
+        ],
+        notes: ["Se a VPS nao conseguir abrir navegador, copie a URL e abra no seu computador."]
+      },
+      {
+        id: "validar",
+        no: "08",
+        title: "Validar instalacao",
+        kicker: "Health check",
+        summary: "Rode como root e confirme CLI, modelo, doctor e gateway.",
+        highlight: "Quem valida cedo evita erro escondido.",
+        commands: [
+          { label: "Validacao completa", code: "sudo -iu openclaw bash -lc 'whoami'\\nsudo -iu openclaw bash -lc 'node -v'\\nsudo -iu openclaw bash -lc 'npm -v'\\nsudo -iu openclaw bash -lc 'command -v openclaw'\\nsudo -iu openclaw bash -lc 'openclaw --version'\\nsudo -iu openclaw bash -lc 'openclaw models status'\\nsudo -iu openclaw bash -lc 'openclaw doctor'\\nsudo -iu openclaw bash -lc 'openclaw gateway status'" }
+        ],
+        checks: [
+          "whoami retorna openclaw.",
+          "node -v mostra Node 22 ou superior.",
+          "command -v openclaw retorna um caminho.",
+          "openclaw --version mostra a versao instalada.",
+          "openclaw models status mostra provider/modelo configurado.",
+          "openclaw doctor nao mostra erro critico.",
+          "openclaw gateway status mostra o gateway instalado ou ativo."
+        ]
+      },
+      {
+        id: "porta22",
+        no: "09",
+        title: "Fechar porta 22",
+        kicker: "Hardening",
+        summary: "So feche a porta 22 depois de confirmar que a porta 2222 funciona.",
+        highlight: "Teste final antes do corte.",
+        commands: [
+          { label: "Teste final", code: "ssh -p 2222 openclaw@IP_DA_VPS" },
+          { label: "Fechar porta 22", code: "sed -i '/^Port 22$/d' /etc/ssh/sshd_config.d/99-hardening.conf\\nsystemctl restart ssh\\nufw delete allow 22/tcp\\nufw status numbered" }
+        ],
+        checks: [
+          "Testei ssh -p 2222 openclaw@IP_DA_VPS antes de mexer na porta 22.",
+          "Removi a porta 22 do SSH.",
+          "O firewall continua ativo.",
+          "Ainda consigo acessar pela porta 2222."
+        ]
+      },
+      {
+        id: "operacao",
+        no: "10",
+        title: "Comandos diarios",
+        kicker: "Operacao",
+        summary: "Comandos para usar depois da instalacao.",
+        highlight: "Entrar, status, logs, doctor, trocar modelo.",
+        commands: [
+          { label: "Entrar na VPS", code: "ssh -p 2222 openclaw@IP_DA_VPS" },
+          { label: "Status", code: "openclaw gateway status\\nopenclaw models status" },
+          { label: "Logs", code: "openclaw gateway logs" },
+          { label: "Diagnostico", code: "openclaw doctor" },
+          { label: "Trocar provider", code: "openclaw onboard --install-daemon" },
+          { label: "Definir modelo", code: "openclaw models set PROVIDER/MODELO" }
+        ]
+      },
+      {
+        id: "socorro",
+        no: "11",
+        title: "Mini-socorro",
+        kicker: "Recuperacao",
+        summary: "Use se algo falhar antes do checklist final.",
+        highlight: "Tentar recuperar pelo OpenClaw primeiro.",
+        notes: [
+          "Se sua instalacao passou na validacao, pule esta etapa e va para o Checklist final.",
+          "A VPS deste guia e Linux/Ubuntu. Use PowerShell apenas para entrar por SSH; depois disso, os comandos rodam dentro do terminal Linux da VPS.",
+          "Comece pelos comandos de diagnostico e reparo do OpenClaw antes de chamar qualquer agente externo."
+        ],
+        commands: [
+          { label: "OpenClaw ausente: diagnostico", code: "sudo -iu openclaw bash -lc 'whoami; node -v; npm -v; npm prefix -g; echo \"$PATH\"; command -v openclaw; openclaw --version'" },
+          { label: "OpenClaw ausente: reinstalar", code: "sudo -iu openclaw bash -lc 'npm install -g openclaw@latest'\\nsudo -iu openclaw bash -lc 'command -v openclaw; openclaw --version'" },
+          { label: "Corrigir permissao npm", code: "sudo -iu openclaw bash -lc 'mkdir -p ~/.npm-global'\\nsudo -iu openclaw bash -lc 'npm config set prefix ~/.npm-global'\\nsudo -iu openclaw bash -lc 'printf \"\\\\nexport PATH=\\\"$HOME/.npm-global/bin:\\\\$PATH\\\"\\\\n\" >> ~/.profile'\\nsudo -iu openclaw bash -lc 'source ~/.profile; npm install -g openclaw@latest'\\nsudo -iu openclaw bash -lc 'source ~/.profile; command -v openclaw; openclaw --version'" },
+          { label: "Gateway", code: "sudo -iu openclaw bash -lc 'openclaw gateway status'\\nsudo -iu openclaw bash -lc 'openclaw gateway install'\\nsudo -iu openclaw bash -lc 'openclaw gateway status'" },
+          { label: "Trocar provider depois", code: "sudo -iu openclaw bash -lc 'openclaw onboard --install-daemon'\\nsudo -iu openclaw bash -lc 'openclaw models status'\\nsudo -iu openclaw bash -lc 'openclaw doctor'" }
+        ],
+        agentFallback: {
+          kicker: "Sugestao final",
+          title: "Se ainda travar: usar Codex ou Claude Code na VPS",
+          body: "Use esta opcao apenas se os comandos de reparo acima nao resolverem. O agente deve rodar dentro do terminal Linux da VPS e seguir o prompt seguro abaixo.",
+          notes: [
+            "Nao e o caminho principal da aula; e um apoio para diagnosticar quando o aluno ficou preso.",
+            "Nao deixe o agente fechar porta 22, alterar firewall ou apagar arquivos sem revisar antes."
+          ],
+          commands: [
+            { label: "Confirmar que voce esta na VPS Linux", code: "uname -a\\ncat /etc/os-release\\nwhoami\\npwd" },
+            { label: "Abrir Codex CLI na VPS Linux", code: "node -v\\nnpm -v\\nnpm install -g @openai/codex\\ncodex --version\\ncodex" },
+            { label: "Abrir Claude Code na VPS Linux", code: "node -v\\nnpm -v\\nnpm install -g @anthropic-ai/claude-code\\nclaude --version\\nclaude" },
+            {
+              label: "Prompt seguro para colar no agente",
+              tip: "Copie este texto para o agente depois de abrir claude ou codex dentro da VPS Linux. Ele orienta o agente a instalar com cuidado.",
+              code: "Voce esta dentro de uma VPS Linux Ubuntu 24.04.\\nObjetivo: ajudar a instalar ou reparar o OpenClaw seguindo este guia.\\nAntes de executar comandos, confirme: whoami, pwd, /etc/os-release, node -v, npm -v e command -v openclaw.\\nNao feche a porta 22 e nao altere firewall/SSH sem confirmar que ssh -p 2222 openclaw@IP_DA_VPS funciona em outro terminal.\\nNao apague arquivos nem rode comandos destrutivos.\\nSe precisar mexer no OpenClaw, prefira comandos com sudo -iu openclaw bash -lc 'COMANDO'.\\nDepois de cada mudanca, valide com openclaw --version, openclaw models status, openclaw doctor e openclaw gateway status.\\nExplique o que vai fazer antes de fazer."
+            }
+          ],
+          table: {
+            head: ["Opcao", "Onde roda", "Quando usar", "Cuidado"],
+            rows: [
+              ["Codex CLI", "Dentro da VPS Linux", "Quando voce tem login/uso do Codex e quer um agente no terminal.", "Revise comandos de SSH, firewall e arquivos antes de aceitar."],
+              ["Claude Code", "Dentro da VPS Linux", "Quando voce prefere o fluxo da Anthropic para orientar a instalacao.", "Nao use modo automatico para hardening sem revisar."],
+              ["Passo a passo do guia", "Navegador + terminal", "Caminho recomendado para aluno iniciante.", "Mais lento, mas reduz erro de ambiente."]
+            ]
+          }
+        }
+      },
+      {
+        id: "final",
+        no: "12",
+        title: "Checklist final",
+        kicker: "Fechamento",
+        summary: "Quando tudo estiver marcado, a instalacao esta pronta para uso basico.",
+        highlight: "Pronto para operar.",
+        checks: [
+          "VPS Hostinger ativa com Ubuntu 24.04.",
+          "SSH pela porta 2222 funciona no computador local.",
+          "Usuario openclaw existe e o comando openclaw responde.",
+          "Provider de IA autenticado e modelo padrao definido.",
+          "openclaw doctor e openclaw gateway status nao mostram erro critico.",
+          "Porta 22 foi fechada somente depois da porta 2222 funcionar e firewall segue ativo."
+        ]
+      }
+    ];
+
+    const glossaryTerms = [
+      ["Acesso root", "Entrada com permissao total para configurar o servidor e alterar partes sensiveis do sistema."],
+      ["Agente no terminal", "Ferramenta como Claude Code ou Codex aberta na linha de comando para ajudar a executar tarefas."],
+      ["API", "Canal padronizado para um programa pedir dados ou executar uma acao em outro sistema."],
+      ["API key", "Codigo secreto que prova para um servico externo que voce tem permissao para usa-lo."],
+      ["apt", "Ferramenta do Ubuntu para instalar, remover e atualizar programas do sistema."],
+      ["apt update", "Atualiza a lista de programas disponiveis antes de instalar qualquer coisa."],
+      ["ASLR", "Protecao do Linux que muda enderecos internos da memoria para dificultar ataques."],
+      ["Assinatura ChatGPT", "Plano pago da conta ChatGPT que pode liberar login por navegador em vez de chave secreta."],
+      ["Autenticacao", "Etapa em que voce prova que tem acesso a uma conta, chave ou servidor."],
+      ["Autorizacao", "Permissao dada depois do login para uma ferramenta executar a acao pedida."],
+      ["Banda", "Quantidade de dados que a VPS pode transferir pela rede em um periodo."],
+      ["Bare Metal", "Instalacao direta no servidor, sem colocar o OpenClaw dentro de Docker."],
+      ["Bash", "Programa que le comandos de texto e manda o Linux executar cada instrucao."],
+      ["bash -n", "Checa se um arquivo de comandos Bash tem erro de escrita sem rodar o arquivo."],
+      ["Bind seguro", "Configuracao que faz um servico escutar apenas no endereco permitido."],
+      ["Browser local", "Navegador do seu computador, usado para abrir links de login que a VPS nao consegue abrir sozinha."],
+      ["cat", "Mostra o conteudo de um arquivo direto no terminal."],
+      ["Chave publica SSH", "Texto que pode ser colocado na VPS para permitir entrada segura sem expor a chave privada."],
+      ["chmod +x", "Autoriza o Linux a executar um arquivo como programa."],
+      ["chmod 600", "Permite que somente o dono leia e edite um arquivo sensivel."],
+      ["chown", "Troca qual usuario e qual grupo sao donos de um arquivo ou pasta."],
+      ["Checklist", "Lista de verificacoes para confirmar que uma etapa realmente terminou."],
+      ["CLI", "Programa controlado por comandos digitados no terminal."],
+      ["Claude Code", "Agente da Anthropic que roda no terminal e pode ajudar a instalar, editar e diagnosticar projetos."],
+      ["Codex", "Produto da OpenAI que pode servir como caminho de login para modelos de IA."],
+      ["Codex CLI", "Agente da OpenAI usado pelo terminal para orientar tarefas de codigo, instalacao e diagnostico."],
+      ["Codigo de retorno", "Numero que informa se um comando terminou com sucesso ou erro."],
+      ["Comando", "Linha colada no terminal para pedir uma acao ao computador ou servidor."],
+      ["command -v", "Confirma se o terminal encontra um programa e mostra o caminho dele."],
+      ["Computador local", "Seu notebook ou PC, usado antes de entrar na VPS para criar chave SSH e testar conexao."],
+      ["Config", "Arquivo ou area onde ficam as escolhas de comportamento de uma ferramenta."],
+      ["curl", "Programa que baixa conteudo de um endereco da internet pelo terminal."],
+      ["curl -fsSL", "Baixa um arquivo mostrando erro claro e sem poluir a tela com progresso."],
+      ["custom endpoint", "Endereco proprio ou alternativo para enviar pedidos de IA."],
+      ["daemon", "Programa que continua rodando no fundo mesmo depois que voce fecha o terminal."],
+      ["df -h", "Mostra quanto espaco de disco esta livre em formato facil de ler."],
+      ["Device code", "Codigo temporario que voce copia no navegador para concluir um login sem tela grafica na VPS."],
+      ["Disco NVMe", "Armazenamento rapido da VPS onde ficam sistema, programas e logs."],
+      ["DNS", "Servico que traduz nomes de sites em enderecos numericos usados pela internet."],
+      ["Docker", "Tecnologia que empacota programas em ambientes isolados chamados containers."],
+      ["Download", "Acao de baixar um arquivo da internet para o computador ou servidor."],
+      ["echo", "Mostra no terminal o texto ou valor que voce pediu para conferir."],
+      ["echo $PATH", "Mostra a lista de pastas onde o terminal procura programas."],
+      ["Endpoint", "Endereco de internet para onde um programa envia uma solicitacao."],
+      ["env", "Conjunto de valores carregados pelo sistema para configurar programas."],
+      ["Erro critico", "Problema que impede continuar a instalacao com seguranca."],
+      ["exit", "Sai do usuario ou sessao atual no terminal."],
+      ["Fail2ban", "Protecao que bloqueia enderecos com muitas tentativas ruins de login."],
+      ["Firewall", "Barreira que decide quais conexoes podem entrar ou sair da VPS."],
+      ["free -m", "Mostra a memoria RAM disponivel em megabytes."],
+      ["Gateway", "Parte do OpenClaw que fica ativa para receber e encaminhar tarefas."],
+      ["Gist", "Pagina simples do GitHub usada para hospedar um arquivo de texto ou script."],
+      ["grep", "Procura uma palavra ou padrao dentro de textos e arquivos."],
+      ["Grupo Linux", "Conjunto de usuarios que compartilham permissoes no sistema."],
+      ["Hardening", "Conjunto de ajustes que reduz pontos fracos de seguranca."],
+      ["Health check", "Teste rapido para saber se uma ferramenta esta funcionando."],
+      ["HOME", "Pasta principal do usuario atual no Linux."],
+      ["Hostinger", "Empresa onde voce pode contratar uma VPS e gerenciar o servidor pelo painel."],
+      ["hPanel", "Painel da Hostinger usado para criar, reiniciar, reinstalar e acessar dados da VPS."],
+      ["hostname", "Nome interno usado para identificar a maquina na rede."],
+      ["id", "Comando que mostra informacoes do usuario atual no Linux."],
+      ["IP da VPS", "Numero publico usado para encontrar o servidor pela internet."],
+      ["IP_DA_VPS", "Marcador do guia que deve ser trocado pelo numero real do servidor."],
+      ["install.sh", "Arquivo de comandos usado para instalar um programa no Linux."],
+      ["Interface grafica", "Tela com janelas e botoes, algo que normalmente nao existe em uma VPS limpa."],
+      ["journalctl", "Mostra registros gravados por servicos controlados pelo Linux."],
+      ["JSON", "Formato de texto organizado com chaves e valores para guardar configuracoes."],
+      ["Kernel", "Nucleo do Linux que conversa com memoria, disco, rede e processos."],
+      ["KVM", "Tipo de virtualizacao usado por provedores para entregar VPS com recursos isolados."],
+      ["LLM", "Modelo de IA treinado para entender e gerar texto."],
+      ["Log", "Registro de mensagens que ajuda a entender o que aconteceu durante uma execucao."],
+      ["logrotate", "Ferramenta que guarda logs por alguns dias e apaga ou compacta os antigos."],
+      ["Linux", "Sistema usado na VPS deste guia; ele e diferente do Windows do computador local."],
+      ["Login por senha", "Entrada usando senha digitada, menos indicada que chave SSH para servidor."],
+      ["mkdir -p", "Cria uma pasta e nao reclama se ela ja existir."],
+      ["Modelo", "Nome da IA escolhida para responder dentro do OpenClaw."],
+      ["Modelo padrao", "IA que o OpenClaw usa automaticamente quando voce nao escolhe outra."],
+      ["Modo local", "Configuracao em que o servico roda na propria VPS."],
+      ["Mistral", "Fornecedor de modelos de IA que pode ser usado quando suportado pela ferramenta."],
+      ["nano", "Editor de texto simples que abre dentro do terminal."],
+      ["Node.js", "Base necessaria para executar programas JavaScript fora do navegador."],
+      ["npm", "Programa que baixa e instala ferramentas feitas para JavaScript fora do navegador."],
+      ["npm install -g @anthropic-ai/claude-code", "Instala o Claude Code como comando global quando Node.js e npm estao prontos."],
+      ["npm install -g @openai/codex", "Instala o Codex CLI como comando global quando Node.js e npm estao prontos."],
+      ["npm install -g", "Instala uma ferramenta para ficar disponivel como comando no terminal."],
+      ["npm prefix -g", "Mostra a pasta onde o npm coloca comandos instalados globalmente."],
+      ["OAuth", "Metodo de login por navegador que evita colar senha dentro do terminal."],
+      ["OpenAI", "Empresa que fornece ChatGPT, Codex e modelos de IA."],
+      ["OpenAI-compatible", "Servico que aceita pedidos no mesmo formato usado por ferramentas da OpenAI."],
+      ["OpenClaw", "Ferramenta instalada na VPS para operar agentes conectados a modelos de IA."],
+      ["openclaw --version", "Confirma que o comando OpenClaw existe e mostra a versao instalada."],
+      ["openclaw doctor", "Roda testes de diagnostico para achar problemas na configuracao."],
+      ["openclaw gateway install", "Instala o componente que deixa o gateway pronto para rodar no fundo."],
+      ["openclaw gateway logs", "Mostra mensagens recentes do gateway para investigar erros."],
+      ["openclaw gateway status", "Mostra se o gateway esta instalado, parado ou ativo."],
+      ["openclaw models auth login", "Inicia o login do provider de IA escolhido."],
+      ["openclaw models list", "Mostra modelos disponiveis para um provider quando a ferramenta suporta listagem."],
+      ["openclaw models set", "Escolhe qual modelo de IA sera usado como padrao."],
+      ["openclaw onboard", "Abre o assistente inicial para configurar login, modelo e servico."],
+      ["PATH", "Lista de pastas onde o terminal procura comandos digitados."],
+      ["Permissao 600", "Regra que deixa um arquivo sensivel acessivel apenas pelo dono."],
+      ["Plano KVM", "Tipo de VPS da Hostinger com recursos isolados para rodar o servidor."],
+      ["Placeholder", "Texto temporario que voce deve substituir por um valor real."],
+      ["Porta", "Numero que identifica por qual entrada de rede um servico atende conexoes."],
+      ["Porta 22", "Entrada padrao do SSH que muitos ataques automatizados tentam usar."],
+      ["Porta 2222", "Entrada alternativa usada no guia para reduzir tentativas comuns de acesso."],
+      ["PowerShell", "Janela de comandos do Windows usada para criar chave SSH e testar conexao."],
+      ["Prompt seguro", "Instrucao que limita riscos antes de pedir para um agente executar comandos no servidor."],
+      ["Provider", "Servico escolhido para fornecer o modelo de IA ao OpenClaw."],
+      ["PROVIDER/MODELO", "Marcador que deve virar o caminho real da IA escolhida no formato aceito pelo OpenClaw."],
+      ["Quota de disco", "Limite de espaco que a VPS pode usar no armazenamento."],
+      ["Query", "Texto usado para procurar algo em uma busca ou filtro."],
+      ["Quick check", "Conferencia curta feita antes de seguir para a proxima etapa."],
+      ["RAM", "Memoria rapida usada pelos programas enquanto estao rodando."],
+      ["reboot", "Reinicia a VPS de forma controlada."],
+      ["Redirect URL", "Endereco que recebe a resposta final depois de um login pelo navegador."],
+      ["Reembolso", "Prazo informado pelo provedor para pedir devolucao do pagamento se voce desistir."],
+      ["Regiao do servidor", "Local fisico aproximado onde a VPS roda e que afeta latencia e velocidade."],
+      ["Renovacao", "Preco cobrado quando o periodo contratado acaba e o servico continua ativo."],
+      ["root", "Usuario administrador com poder total sobre o Linux."],
+      ["Rollback", "Plano para voltar ao estado anterior se uma mudanca der errado."],
+      ["Script", "Arquivo com varias linhas de comando executadas em sequencia."],
+      ["sed -i", "Altera texto dentro de um arquivo diretamente pelo terminal."],
+      ["Servico", "Programa configurado para iniciar e continuar rodando no sistema."],
+      ["Servidor VPS", "Produto de servidor virtual que fica ligado na internet para hospedar o OpenClaw."],
+      ["Shell", "Ambiente onde voce digita comandos e recebe respostas do sistema."],
+      ["SSH", "Forma segura de entrar e controlar a VPS pelo terminal."],
+      ["ssh root@IP_DA_VPS", "Entra na VPS como administrador usando o IP real do servidor."],
+      ["ssh-keygen", "Cria um par de chaves usado para entrar no servidor com mais seguranca."],
+      ["sudo", "Executa uma acao com permissao elevada quando o usuario tem autorizacao."],
+      ["sudo -iu openclaw", "Entra como usuario openclaw carregando as configuracoes dele."],
+      ["swap", "Espaco em disco usado como apoio quando a memoria RAM fica cheia."],
+      ["systemctl", "Controla servicos do Linux para iniciar, parar ou ver status."],
+      ["tail -n 200", "Mostra as 200 ultimas linhas de um arquivo de log."],
+      ["Terminal", "Janela onde voce digita comandos e acompanha as respostas do computador ou servidor."],
+      ["Terminal da VPS", "Sessao Linux aberta depois do SSH, onde rodam comandos do servidor Ubuntu."],
+      ["Terminal local", "Janela de comandos do seu computador antes de entrar na VPS por SSH."],
+      ["Teste 2222", "Conferencia de que a nova porta SSH funciona antes de fechar a porta antiga."],
+      ["Token", "Codigo temporario ou secreto usado para provar acesso a um servico."],
+      ["tty", "Ligacao do comando com o teclado e a tela do terminal atual."],
+      ["Ubuntu 24.04 LTS", "Versao estavel do Linux indicada para esta instalacao."],
+      ["ufw allow", "Libera uma porta especifica no firewall do Ubuntu."],
+      ["ufw delete", "Remove uma regra antiga do firewall do Ubuntu."],
+      ["ufw status", "Mostra as regras ativas do firewall do Ubuntu."],
+      ["Usuario openclaw", "Conta separada criada para rodar o agente sem depender do root."],
+      ["Variavel de ambiente", "Valor que o sistema entrega aos programas para orientar configuracoes."],
+      ["Validacao", "Confirmacao pratica de que uma etapa funcionou antes de continuar."],
+      ["vCPU", "Nucleo de processamento virtual que define parte da capacidade de trabalho da VPS."],
+      ["VPS", "Servidor Linux alugado na nuvem para ficar ligado sem depender do seu computador."],
+      ["VPS Linux", "Servidor na nuvem com Ubuntu onde a instalacao do OpenClaw realmente acontece."],
+      ["Windows PowerShell", "Nome completo do PowerShell quando ele aparece no menu Iniciar do Windows."],
+      ["Wizard", "Assistente interativo; nao e provider, apenas ajuda a escolher, autenticar e configurar o provider real."],
+      ["xAI", "Fornecedor de modelos de IA que pode ser usado quando houver suporte e credencial."],
+      ["YAML", "Formato de texto usado em configuracoes por ser facil de ler e editar."],
+      ["Z.AI", "Fornecedor de modelos de IA que pode ser escolhido quando o OpenClaw oferecer suporte."]
+    ];
+
+    const stateKey = "openclaw-command-deck:v1";
+    const themeKey = "openclaw-command-deck-theme:v1";
+    const stageKey = "openclaw-command-deck-stage:v1";
+    const saved = JSON.parse(localStorage.getItem(stateKey) || "{}");
+    let currentIndex = Math.max(0, stages.findIndex((stage) => stage.id === localStorage.getItem(stageKey)));
+    if (currentIndex < 0) currentIndex = 0;
+    let showingGlossary = false;
+
+    const stageList = document.getElementById("stageList");
+    const stagePanel = document.getElementById("stagePanel");
+    const progressOrb = document.getElementById("progressOrb");
+    const progressValue = document.getElementById("progressValue");
+    const progressSummary = document.getElementById("progressSummary");
+    const topTitle = document.getElementById("topTitle");
+    const topSummary = document.getElementById("topSummary");
+    const phaseGrid = document.getElementById("phaseGrid");
+    const asideTitle = document.getElementById("asideTitle");
+    const asideSummary = document.getElementById("asideSummary");
+    const contextList = document.getElementById("contextList");
+    const stageSearch = document.getElementById("stageSearch");
+    const glossaryToggle = document.getElementById("glossaryToggle");
+    const toast = document.getElementById("toast");
+    const floatingTip = document.getElementById("floatingTip");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function checkId(stage, index, prefix = "check") {
+      return `${stage.id}-${prefix}-${index}`;
+    }
+
+    function providerChoiceId(stage) {
+      return `${stage.id}-provider-choice`;
+    }
+
+    function stageCompleteId(stage) {
+      return `${stage.id}-stage-complete`;
+    }
+
+    function selectedProviderIndex(stage) {
+      if (!stage.providers || !stage.providers.length) return -1;
+      const choice = Number(saved[providerChoiceId(stage)] ?? 0);
+      return Number.isInteger(choice) && choice >= 0 && choice < stage.providers.length ? choice : 0;
+    }
+
+    function allCheckIds() {
+      const ids = [];
+      stages.forEach((stage) => ids.push(...stageCheckIds(stage)));
+      return ids;
+    }
+
+    function stageCheckIds(stage) {
+      const ids = [];
+      (stage.checks || []).forEach((_, index) => ids.push(checkId(stage, index)));
+      if (stage.providers && stage.providers.length) {
+        const providerIndex = selectedProviderIndex(stage);
+        const provider = stage.providers[providerIndex];
+        (provider.checks || []).forEach((_, index) => ids.push(checkId(stage, `${providerIndex}-${index}`, "provider")));
+      }
+      return ids;
+    }
+
+    function stageIsDone(stage) {
+      const ids = stageCheckIds(stage);
+      if (ids.length) return ids.every((id) => saved[id]);
+      return Boolean(saved[stageCompleteId(stage)]);
+    }
+
+    function markReferenceStageDone(stage) {
+      if (stageCheckIds(stage).length) return;
+      saved[stageCompleteId(stage)] = true;
+      localStorage.setItem(stateKey, JSON.stringify(saved));
+    }
+
+    function sortedGlossaryTerms() {
+      return [...glossaryTerms].sort((a, b) => a[0].localeCompare(b[0], "pt-BR", { sensitivity: "base" }));
+    }
+
+    function glossaryLetter(term) {
+      const first = term.normalize("NFD").replace(/[\u0300-\u036f]/g, "").charAt(0).toUpperCase();
+      return /^[A-Z]$/.test(first) ? first : "#";
+    }
+
+    function glossaryGroups() {
+      return sortedGlossaryTerms().reduce((groups, item) => {
+        const letter = glossaryLetter(item[0]);
+        groups[letter] = groups[letter] || [];
+        groups[letter].push(item);
+        return groups;
+      }, {});
+    }
+
+    function renderGlossaryStage() {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const groups = glossaryGroups();
+      const letterIndex = alphabet
+        .map((letter) => groups[letter]
+          ? `<a class="letter-link" href="#letter-${letter}">${letter}</a>`
+          : `<span class="letter-link disabled">${letter}</span>`)
+        .join("");
+      const sections = alphabet
+        .filter((letter) => groups[letter])
+        .map((letter) => `
+          <section class="glossary-section" id="letter-${letter}">
+            <div class="letter-heading">${letter}</div>
+            <div class="glossary-grid">
+              ${groups[letter].map(([term, description]) => `
+                <article class="glossary-card">
+                  <strong>${escapeHtml(term)}</strong>
+                  <p>${escapeHtml(description)}</p>
+                </article>
+              `).join("")}
+            </div>
+          </section>
+        `)
+        .join("");
+
+      topTitle.textContent = "Glossario tecnico A-Z";
+      topSummary.textContent = `${glossaryTerms.length} termos tecnicos explicados em uma frase.`;
+
+      stagePanel.innerHTML = `
+        <div class="glossary-stage">
+          <div class="glossary-hero">
+            <div class="kicker">Glossario tecnico</div>
+            <h1>Indice A-Z</h1>
+            <p>Termos da instalacao explicados de forma direta, sem depender de outro termo tecnico para entender.</p>
+            <button class="deck-button" id="backToGuide" type="button">Voltar ao passo atual</button>
+          </div>
+          <div class="letter-index" aria-label="Indice alfabetico">${letterIndex}</div>
+          <div class="glossary-sections">${sections}</div>
+          <div class="stage-footer">
+            <button class="deck-button" id="backToGuideFooter" type="button">Voltar ao guia</button>
+            <button class="deck-button primary" id="nextFromGlossary" type="button">Avancar</button>
+          </div>
+        </div>
+      `;
+
+      ["backToGuide", "backToGuideFooter"].forEach((id) => {
+        document.getElementById(id).addEventListener("click", () => {
+          showingGlossary = false;
+          render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+      document.getElementById("nextFromGlossary").addEventListener("click", () => moveStage(1));
+    }
+
+    function renderRail() {
+      const query = stageSearch.value.trim().toLowerCase();
+      glossaryToggle.classList.toggle("active", showingGlossary);
+      glossaryToggle.setAttribute("aria-pressed", String(showingGlossary));
+      glossaryToggle.querySelector("span").textContent = showingGlossary ? "Fechar" : "Abrir";
+      stageList.innerHTML = stages
+        .map((stage, index) => ({ stage, index }))
+        .filter(({ stage }) => !query || `${stage.title} ${stage.summary} ${stage.kicker}`.toLowerCase().includes(query))
+        .map(({ stage, index }) => {
+          const done = stageIsDone(stage);
+          const active = !showingGlossary && index === currentIndex;
+          return `<button class="stage-button ${active ? "active" : ""} ${done ? "done" : ""}" type="button" data-stage="${index}">
+            <span class="stage-no">${stage.no}</span>
+            <span><strong>${escapeHtml(stage.title)}</strong><small>${escapeHtml(stage.kicker)}</small></span>
+            <span class="stage-dot" aria-hidden="true"></span>
+          </button>`;
+        })
+        .join("");
+
+      stageList.querySelectorAll("[data-stage]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentIndex = Number(button.dataset.stage);
+          showingGlossary = false;
+          document.body.classList.remove("nav-open");
+          render();
+        });
+      });
+    }
+
+    function commandText(code) {
+      return String(code || "").replace(/(^|[^\\])\\n/g, (_, prefix) => `${prefix}\n`);
+    }
+
+    function commandTip(command) {
+      const code = commandText(command.code || "");
+      const label = command.label || "Comando";
+      const lower = code.toLowerCase();
+
+      if (command.tip) return command.tip;
+      if (lower.includes("@openai/codex") || lower.includes("codex --version")) {
+        return "Rode no terminal SSH da VPS Linux, de preferencia no usuario que vai usar o agente. Nao e comando do PowerShell local.";
+      }
+      if (lower.includes("@anthropic-ai/claude-code") || lower.includes("claude --version")) {
+        return "Rode no terminal SSH da VPS Linux, de preferencia no usuario que vai usar o agente. Nao use sudo antes do npm install.";
+      }
+      if (lower.includes("uname -a") || lower.includes("cat /etc/os-release")) {
+        return "Rode dentro da VPS Linux para confirmar que voce esta no servidor Ubuntu antes de chamar Codex ou Claude Code.";
+      }
+      if (lower.includes("ssh-keygen") || lower.includes("userprofile") || lower.includes("~/.ssh")) {
+        return "Rode no PowerShell ou Terminal do seu computador local. Use para criar ou mostrar a chave SSH antes de entrar na VPS.";
+      }
+      if (lower.includes("ssh root@") || lower.includes("ssh -p porta root@")) {
+        return "Rode no PowerShell ou Terminal do seu computador local. Troque IP_DA_VPS e PORTA antes de apertar Enter.";
+      }
+      if (lower.includes("ssh -p 2222 openclaw@")) {
+        return "Rode no PowerShell ou Terminal do seu computador local. Este teste confirma se a nova porta SSH funciona.";
+      }
+      if (lower.includes("curl -fssl") || lower.includes("/tmp/setup.sh") || lower.includes("bash -n")) {
+        return "Rode dentro da VPS como root. Este comando baixa, valida ou executa o setup Bare Metal.";
+      }
+      if (lower.includes("sudo -iu openclaw")) {
+        return "Rode dentro da VPS, normalmente como root. O proprio comando entra no usuario openclaw antes de executar a acao.";
+      }
+      if (lower.includes("sed -i") || lower.includes("ufw ") || lower.includes("systemctl")) {
+        return "Rode dentro da VPS como root. Use somente depois de confirmar que a etapa anterior funcionou.";
+      }
+      if (lower.includes("cat /etc/os-release") || lower.includes("free -h") || lower.includes("df -h")) {
+        return "Rode dentro da VPS como root para conferir sistema, memoria e disco antes de continuar.";
+      }
+      if (lower.startsWith("openclaw ")) {
+        return "Rode dentro da VPS como usuario openclaw, depois de entrar com ssh -p 2222 openclaw@IP_DA_VPS.";
+      }
+      return `Antes de colar "${label}", confira em qual ambiente a etapa manda executar e substitua os placeholders do comando.`;
+    }
+
+    function commandHtml(command) {
+      const tip = commandTip(command);
+      return `<div class="command-card">
+        <div class="command-head">
+          <span class="command-title">
+            <span>${escapeHtml(command.label)}</span>
+            <span class="command-help" tabindex="0" aria-label="${escapeHtml(tip)}" data-tip="${escapeHtml(tip)}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span>
+          </span>
+          <button class="copy-button" type="button">Copiar</button>
+        </div>
+        <pre><code>${escapeHtml(commandText(command.code))}</code></pre>
+      </div>`;
+    }
+
+    function checkHtml(id, label) {
+      return `<div class="check-item">
+        <input id="${escapeHtml(id)}" type="checkbox" ${saved[id] ? "checked" : ""} />
+        <label for="${escapeHtml(id)}">${escapeHtml(label)}</label>
+      </div>`;
+    }
+
+    function tableCellValue(cell) {
+      return typeof cell === "object" && cell !== null ? cell.text : cell;
+    }
+
+    function tableCellTip(cell) {
+      return typeof cell === "object" && cell !== null ? cell.tip : "";
+    }
+
+    function tableCellUrl(cell) {
+      return typeof cell === "object" && cell !== null ? cell.url : "";
+    }
+
+    function tableCellHtml(cell, label, cellIndex, totalCells) {
+      const value = tableCellValue(cell);
+      const tip = tableCellTip(cell);
+      const url = tableCellUrl(cell);
+      const edgeClass = cellIndex === totalCells - 1 ? " tip-left" : "";
+      const help = tip ? `<span class="cell-help${edgeClass}" tabindex="0" aria-label="${escapeHtml(tip)}" data-tip="${escapeHtml(tip)}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5"></path><path d="M12 8h.01"></path></svg></span>` : "";
+      const content = url
+        ? `<a class="table-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer"><code>${escapeHtml(value)}</code></a>`
+        : `<code>${escapeHtml(value)}</code>`;
+      return `<td data-label="${escapeHtml(label || "")}"><span class="table-cell">${content}${help}</span></td>`;
+    }
+
+    function tableHtml(table) {
+      if (!table) return "";
+      return `<table class="simple-table">
+        <thead><tr>${table.head.map((head) => `<th>${escapeHtml(head)}</th>`).join("")}</tr></thead>
+        <tbody>${table.rows.map((row) => `<tr>${row.map((cell, cellIndex) => tableCellHtml(cell, table.head[cellIndex], cellIndex, row.length)).join("")}</tr>`).join("")}</tbody>
+      </table>`;
+    }
+
+    function linksHtml(stage) {
+      if (!stage.links) return "";
+      return stage.links.map((link) => `
+        <a class="link-card" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+          <div class="card-kicker">Link recomendado</div>
+          <div class="link-title">
+            <strong>${escapeHtml(link.label)}</strong>
+            <span class="link-cta">CLIQUE AQUI</span>
+          </div>
+          <span class="link-body">${escapeHtml(link.body || link.url)}</span>
+        </a>
+      `).join("");
+    }
+
+    function tablesHtml(stage) {
+      return [stage.table, ...(stage.tables || [])].map(tableHtml).join("");
+    }
+
+    function providersHtml(stage) {
+      if (!stage.providers) return "";
+      const activeProviderIndex = selectedProviderIndex(stage);
+      return `<div class="provider-grid">${stage.providers.map((provider, providerIndex) => {
+        const active = providerIndex === activeProviderIndex;
+        const providerChecks = (provider.checks || []).map((check, index) => checkHtml(checkId(stage, `${providerIndex}-${index}`, "provider"), check)).join("");
+        const extraCommands = active ? (provider.extraCommands || []).map(commandHtml).join("") : "";
+        return `
+        <article class="provider-card ${active ? "active" : ""}">
+          <div class="card-kicker">Caminho ${providerIndex + 1}</div>
+          <strong>${escapeHtml(provider.title)}</strong>
+          <p>${escapeHtml(provider.body)}</p>
+          <button class="deck-button provider-choice ${active ? "active" : ""}" type="button" data-provider-choice="${providerIndex}">
+            ${active ? "Caminho selecionado" : "Usar este caminho"}
+          </button>
+          ${commandHtml({ label: provider.title, code: provider.code })}
+          ${extraCommands}
+          ${active ? `<div class="check-grid">${providerChecks}</div>` : `<div class="provider-hint">Escolha este caminho para mostrar e contar somente os checkpoints dele.</div>`}
+        </article>
+      `; }).join("")}</div>`;
+    }
+
+    function agentFallbackHtml(stage) {
+      const fallback = stage.agentFallback;
+      if (!fallback) return "";
+      const notes = (fallback.notes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const commands = (fallback.commands || []).map(commandHtml).join("");
+      return `
+        <section class="fallback-panel">
+          <div class="fallback-head">
+            <div class="kicker">${escapeHtml(fallback.kicker || "Sugestao")}</div>
+            <strong>${escapeHtml(fallback.title)}</strong>
+            <p>${escapeHtml(fallback.body)}</p>
+          </div>
+          ${notes ? `<div class="fallback-grid">${notes}</div>` : ""}
+          ${commands ? `<div class="fallback-grid">${commands}</div>` : ""}
+          ${fallback.table ? tableHtml(fallback.table) : ""}
+        </section>
+      `;
+    }
+
+    function renderStage() {
+      const stage = stages[currentIndex];
+      topTitle.textContent = stage.title;
+      topSummary.textContent = stage.summary;
+      asideTitle.textContent = `${stage.no} - ${stage.title}`;
+      asideSummary.textContent = stage.highlight;
+      localStorage.setItem(stageKey, stage.id);
+
+      const commands = (stage.commands || []).map(commandHtml).join("");
+      const leftNotes = (stage.leftNotes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const checks = (stage.checks || []).map((check, index) => checkHtml(checkId(stage, index), check)).join("");
+      const notes = (stage.notes || []).map((note) => `<div class="note-card">${escapeHtml(note)}</div>`).join("");
+      const checkCount = stageCheckIds(stage).length;
+      const doneCount = stageCheckIds(stage).filter((id) => saved[id]).length;
+      const referenceDone = !checkCount && Boolean(saved[stageCompleteId(stage)]);
+      const checkpointLabel = checkCount ? `${doneCount}/${checkCount}` : "Consulta";
+      const statusLabel = checkCount ? (doneCount === checkCount ? "Completo" : "Em andamento") : (referenceDone ? "Concluido" : "Consulta");
+      const titleClass = stage.id === "uso" ? "step-title" : (stage.title.length > 38 ? "long-title" : "");
+
+      stagePanel.innerHTML = `
+        <div class="stage-hero">
+          <div class="feature-card">
+            <div class="kicker">${escapeHtml(stage.kicker)}</div>
+            <h1 class="${titleClass}">${escapeHtml(stage.title)}</h1>
+            <p>${escapeHtml(stage.summary)}</p>
+          </div>
+          <div class="stage-meta">
+            <div class="mini-card"><div class="mini-label">Etapa</div><strong>${escapeHtml(stage.no)}</strong></div>
+            <div class="mini-card"><div class="mini-label">Checkpoints</div><strong>${checkpointLabel}</strong></div>
+            <div class="mini-card"><div class="mini-label">Foco</div><strong>${escapeHtml(stage.highlight)}</strong></div>
+            <div class="mini-card"><div class="mini-label">Status</div><strong>${statusLabel}</strong></div>
+          </div>
+        </div>
+        <div class="stage-content ${stage.providers ? "provider-stage-content" : ""}">
+          <div class="content-column">
+            ${linksHtml(stage)}
+            ${providersHtml(stage)}
+            ${commands}
+            ${leftNotes}
+            ${tablesHtml(stage)}
+          </div>
+          <div class="content-column">
+            ${checks ? `<div class="check-grid">${checks}</div>` : `<div class="note-card">Esta etapa e de consulta. Use os comandos quando precisar.</div>`}
+            ${notes}
+          </div>
+        </div>
+        ${agentFallbackHtml(stage)}
+        <div class="stage-footer">
+          <button class="deck-button" id="prevStage" type="button">Voltar</button>
+          <button class="deck-button primary" id="nextStage" type="button">Avancar</button>
+        </div>
+      `;
+
+      stagePanel.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.addEventListener("change", () => {
+          saved[input.id] = input.checked;
+          localStorage.setItem(stateKey, JSON.stringify(saved));
+          render();
+        });
+      });
+
+      stagePanel.querySelectorAll("[data-provider-choice]").forEach((button) => {
+        button.addEventListener("click", () => {
+          saved[providerChoiceId(stage)] = Number(button.dataset.providerChoice);
+          localStorage.setItem(stateKey, JSON.stringify(saved));
+          render();
+        });
+      });
+
+      stagePanel.querySelectorAll(".copy-button").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const code = button.closest(".command-card").querySelector("code").innerText;
+          await copyText(code);
+          button.textContent = "Copiado";
+          showToast("Comando copiado");
+          setTimeout(() => (button.textContent = "Copiar"), 1200);
+        });
+      });
+
+      document.getElementById("prevStage").addEventListener("click", () => moveStage(-1));
+      document.getElementById("nextStage").addEventListener("click", () => moveStage(1));
+    }
+
+    function renderAside() {
+      phaseGrid.innerHTML = stages.map((stage) => {
+        const ids = stageCheckIds(stage);
+        const done = stageIsDone(stage);
+        return `<div class="phase-cell ${done ? "done" : ""} ${ids.length ? "" : "reference"}">${stage.no}</div>`;
+      }).join("");
+
+      if (showingGlossary) {
+        asideTitle.textContent = "Glossario tecnico A-Z";
+        asideSummary.textContent = `${glossaryTerms.length} termos em linguagem direta.`;
+        contextList.innerHTML = [
+          `<div class="context-item"><strong>Como usar</strong><p>Clique em uma letra do indice e leia somente o termo que travou o passo.</p></div>`,
+          `<div class="context-item"><strong>Regra</strong><p>Cada explicacao tem uma frase para consulta rapida durante a instalacao.</p></div>`
+        ].join("");
+        return;
+      }
+
+      const stage = stages[currentIndex];
+      const commands = (stage.commands || []).slice(0, 4);
+      contextList.innerHTML = [
+        `<div class="context-item"><strong>Trocas antes de colar</strong><p>IP_DA_VPS = IP publico da sua VPS; PORTA = 2222; EMAIL = seu e-mail; PROVIDER/MODELO = modelo escolhido.</p></div>`,
+        `<div class="context-item"><strong>IA recomendada</strong><p>Na aula, use openai-codex/gpt-5.4 se tiver ChatGPT/Codex; use o assistente/API key apenas se ja tiver outro provider.</p></div>`,
+        ...commands.map((command) => `<div class="context-item"><strong>${escapeHtml(command.label)}</strong><p>${escapeHtml(commandText(command.code).split("\n")[0])}</p></div>`)
+      ].join("");
+    }
+
+    function renderProgress() {
+      const ids = allCheckIds();
+      const done = ids.filter((id) => saved[id]).length;
+      const total = ids.length;
+      const percent = total ? Math.round((done / total) * 100) : 0;
+      progressValue.textContent = `${percent}%`;
+      progressSummary.textContent = `${done} de ${total}`;
+      progressOrb.style.background = `conic-gradient(var(--green) ${percent * 3.6}deg, var(--line) 0deg)`;
+    }
+
+    function render() {
+      renderRail();
+      if (showingGlossary) {
+        renderGlossaryStage();
+      } else {
+        renderStage();
+      }
+      renderAside();
+      renderProgress();
+    }
+
+    function moveStage(direction) {
+      const wasGlossary = showingGlossary;
+      if (!wasGlossary && direction > 0) {
+        markReferenceStageDone(stages[currentIndex]);
+      }
+      showingGlossary = false;
+      currentIndex = (currentIndex + direction + stages.length) % stages.length;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function showFloatingTip(trigger) {
+      const message = trigger?.dataset?.tip;
+      if (!message) return;
+      floatingTip.textContent = message;
+      floatingTip.setAttribute("aria-hidden", "false");
+      floatingTip.classList.add("show");
+
+      const rect = trigger.getBoundingClientRect();
+      const margin = 12;
+      const maxWidth = Math.min(320, window.innerWidth - margin * 2);
+      floatingTip.style.width = `${maxWidth}px`;
+      floatingTip.style.left = "0px";
+      floatingTip.style.top = "0px";
+
+      const tipRect = floatingTip.getBoundingClientRect();
+      const left = clamp(rect.left, margin, window.innerWidth - tipRect.width - margin);
+      let top = rect.bottom + 8;
+      if (top + tipRect.height > window.innerHeight - margin) {
+        top = rect.top - tipRect.height - 8;
+      }
+      floatingTip.style.left = `${left}px`;
+      floatingTip.style.top = `${Math.max(margin, top)}px`;
+    }
+
+    function hideFloatingTip() {
+      floatingTip.classList.remove("show");
+      floatingTip.setAttribute("aria-hidden", "true");
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const area = document.createElement("textarea");
+      area.value = text;
+      area.setAttribute("readonly", "");
+      area.style.position = "fixed";
+      area.style.left = "-9999px";
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+    }
+
+    const themeIcons = {
+      sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>',
+      moon: '<svg viewBox="0 0 24 24"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.5 6.5 0 0 0 9.8 9.8Z"></path></svg>'
+    };
+
+    function setThemeButton(button, icon, label) {
+      button.innerHTML = `<span class="theme-icon" aria-hidden="true">${themeIcons[icon]}</span>`;
+      button.setAttribute("aria-label", label);
+      button.setAttribute("title", label);
+    }
+
+    function applyTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      const label = theme === "dark" ? "Alternar para tema claro" : "Alternar para tema escuro";
+      const icon = theme === "dark" ? "sun" : "moon";
+      setThemeButton(document.getElementById("themeToggle"), icon, label);
+      setThemeButton(document.getElementById("themeToggleTop"), icon, label);
+      localStorage.setItem(themeKey, theme);
+    }
+
+    function toggleTheme() {
+      applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+      showToast(document.documentElement.dataset.theme === "dark" ? "Tema escuro ativo" : "Tema claro ativo");
+    }
+
+    document.getElementById("themeToggle").addEventListener("click", toggleTheme);
+    document.getElementById("themeToggleTop").addEventListener("click", toggleTheme);
+    document.getElementById("nextTop").addEventListener("click", () => moveStage(1));
+    document.getElementById("menuButton").addEventListener("click", () => document.body.classList.toggle("nav-open"));
+    document.getElementById("resetProgress").addEventListener("click", () => {
+      if (!confirm("Limpar todos os checkpoints marcados neste navegador?")) return;
+      Object.keys(saved).forEach((key) => delete saved[key]);
+      localStorage.setItem(stateKey, JSON.stringify(saved));
+      render();
+      showToast("Progresso limpo");
+    });
+    stageSearch.addEventListener("input", renderRail);
+    glossaryToggle.addEventListener("click", () => {
+      showingGlossary = !showingGlossary;
+      document.body.classList.remove("nav-open");
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast(showingGlossary ? "Glossario aberto" : "Voltou ao guia");
+    });
+
+    document.addEventListener("mouseover", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (!trigger) return;
+      showFloatingTip(trigger);
+    });
+
+    document.addEventListener("mouseout", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (!trigger) return;
+      if (event.relatedTarget && trigger.contains(event.relatedTarget)) return;
+      hideFloatingTip();
+    });
+
+    document.addEventListener("focusin", (event) => {
+      const trigger = event.target.closest("[data-tip]");
+      if (trigger) showFloatingTip(trigger);
+    });
+
+    document.addEventListener("focusout", (event) => {
+      if (event.target.closest("[data-tip]")) hideFloatingTip();
+    });
+
+    window.addEventListener("scroll", hideFloatingTip, true);
+    window.addEventListener("resize", hideFloatingTip);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.target.matches("input, textarea")) return;
+      hideFloatingTip();
+      if (event.key.toLowerCase() === "j") moveStage(1);
+      if (event.key.toLowerCase() === "k") moveStage(-1);
+    });
+
+    applyTheme(localStorage.getItem(themeKey) || "dark");
+    render();
+  </script>
+</body>
+</html>
